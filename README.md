@@ -48,7 +48,7 @@ This project aims to provide an Elo scoring system for table soccer, allowing pl
 
     ```bash
       source .env
-      sqlite3 $(DB_NAME) < repositories/database.sql
+      sqlite3 $DB_NAME < repositories/database.sql
     ```
 
 4. Run the application:
