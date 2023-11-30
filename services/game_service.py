@@ -95,4 +95,4 @@ class GameService:
             self.repo.update_user_rank(player.id, player.rank_score, player.last_results)
             self.repo.close_user_game(match.game_id, player.id, match_point)
 
-        print(f"Game {match.game_id} ended")
+        return players
