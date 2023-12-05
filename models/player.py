@@ -1,5 +1,6 @@
 """player model"""
 from enum import Enum
+import json
 
 from models.user import User
 
@@ -25,3 +26,15 @@ class Player(User):
     def add_rank_score(self, score):
         """sum score to the player rank_score"""
         self.rank_score += score
+
+        return self.rank_score
+
+    def toJSON(self):
+        """serialize Player class"""
+        return {
+            "id": self.id,
+            "name": self.name,
+            "team": self.team,
+            "score": self.rank_score,
+            "last_results": self.last_results
+        }

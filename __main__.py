@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 from services.game_service import GameService
 from services.rank_service import RankService
+from services.http_web_service import HttpWebService
 from repositories.sqlite_repo import SQLiteRepository
 from models.player import Teams
 
@@ -35,8 +36,11 @@ print(f"""
     BLUE wins for {match.get_expected_score(Teams.BLUE.value) * 100} % ({match.get_team_points(Teams.BLUE.value)} points)
   """)
 
-updated_players = game_service.game_end(match, 6, 0)
+# updated_players = game_service.game_end(match, 1, 11)
 
-print(f"Game {match.game_id} ended")
-for player in updated_players:
-    print(f"  - Player #{player.id} Score: {player.rank_score}")
+# print(f"Game {match.game_id} ended")
+# for player in updated_players:
+#     print(f"  - Player #{player.id} Score: {player.rank_score}")
+
+http_service = HttpWebService(repo)
+http_service.start(5000)

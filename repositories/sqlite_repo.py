@@ -21,7 +21,7 @@ class SQLiteRepository(Repository):
         else:
             print("Connecting to datasource")
 
-        self.connection = sqlite3.connect(self.configs["DB_NAME"])
+        self.connection = sqlite3.connect(self.configs["DB_NAME"], check_same_thread=False)
         self.cursor = self.connection.cursor()
 
         self.is_connected = True
@@ -52,6 +52,27 @@ class SQLiteRepository(Repository):
         self.cursor.execute("UPDATE games SET state = ?, final_result = ? WHERE id = ?",
             (state, final_result, game_id))
         self.connection.commit()
+
+    def get_players(self) -> list[Player]:
+        """Restituisce la lista di giocatori (Player)"""
+        self.cursor.execute("""
+            SELECT users.id, users.name, user_ranks.points, user_ranks.last_results
+            FROM users
+            LEFT JOIN user_ranks ON (users.id = user_ranks.user_id)
+            """
+        )
+
+        players_list = []
+        for result in self.cursor.fetchall():
+            players_list.append(Player(
+                result[0],
+                result[1],
+                None,
+                result[2],
+                result[3]
+            ))
+
+        return players_list
 
     def get_player(self, user_id: int, team: Teams) -> Player:
         self.cursor.execute("""

@@ -41,12 +41,3 @@ class Repository(ABC):
     @abstractmethod
     def update_user_rank(self, user_id: int, points: int, last_results: int(8)):
         """Update user rank"""
-
-# """Repository abstracts"""
-# from abc import ABC, abstractmethod
-
-# class Repository:
-#     """"Repository class"""
-#     def select_user(self):
-#         """get users from db"""
-#         pass
