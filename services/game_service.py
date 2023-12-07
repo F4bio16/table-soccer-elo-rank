@@ -55,6 +55,18 @@ class GameService:
             - aggiorniamo il rank dei giocatori
         """
 
+        match.set_expected_score(Teams.RED.value,
+            self.rank_service.calculate_expected_score(
+                match.get_team_points(Teams.RED.value),
+                match.get_team_points(Teams.BLUE.value)
+        ))
+
+        match.set_expected_score(Teams.BLUE.value,
+            self.rank_service.calculate_expected_score(
+                match.get_team_points(Teams.BLUE.value),
+                match.get_team_points(Teams.RED.value)
+        ))
+
         winner = Teams.RED.value if team_red_score > team_blue_score else Teams.BLUE.value
         players = self.repo.get_players_by_game(match.game_id)
 

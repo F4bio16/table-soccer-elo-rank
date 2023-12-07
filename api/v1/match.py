@@ -43,13 +43,15 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
         data = request.json
         data.get("red_result")
 
+        match = Match(int(match_id), repo.get_players_by_game(int(match_id)))
+
         player_scores = game_service.game_end(
-            Match(match_id, repo.get_players_by_game(match_id)),
+            match,
             data.get("red_result"), data.get("blue_result")
         )
 
         return jsonify({
-            "player_scores": player_scores
+            "player_scores": [player.toJSON() for player in player_scores]
         })
 
     return match_bp
