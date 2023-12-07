@@ -20,4 +20,4 @@ class HttpWebService:
 
     def start(self, listening_port):
         """staring WebServer to listening_port"""
-        self.server.run(debug=True, port=listening_port)
+        self.server.run(host='0.0.0.0', debug=True, port=listening_port)

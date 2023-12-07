@@ -39,6 +39,7 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
     def complete_match(match_id):
         """terminate match and set result"""
 
+        print(f"called complete_match api with match_id {match_id}")
         data = request.json
         data.get("red_result")
 
