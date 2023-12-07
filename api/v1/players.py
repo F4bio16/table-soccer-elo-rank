@@ -1,4 +1,4 @@
-"""User router"""
+"""Player router"""
 from flask import Blueprint, jsonify
 from repositories.sqlite_repo import SQLiteRepository
 

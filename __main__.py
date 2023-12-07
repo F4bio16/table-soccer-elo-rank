@@ -42,5 +42,5 @@ print(f"""
 # for player in updated_players:
 #     print(f"  - Player #{player.id} Score: {player.rank_score}")
 
-http_service = HttpWebService(repo)
+http_service = HttpWebService(repo, game_service)
 http_service.start(5000)

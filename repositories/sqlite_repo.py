@@ -4,6 +4,8 @@ from time import time
 
 from models.game import GameState
 from models.player import Player, Teams
+from models.match import Match
+
 from repositories.repository import Repository
 
 class SQLiteRepository(Repository):
