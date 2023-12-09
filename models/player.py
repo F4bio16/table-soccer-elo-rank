@@ -1,6 +1,5 @@
 """player model"""
 from enum import Enum
-import json
 
 from models.user import User
 
@@ -12,8 +11,8 @@ class Teams(Enum):
 class Player(User):
     """Player Class extended by User"""
 
-    def __init__(self, _id, name, team: Teams, rank_score, last_results):
-        super().__init__(_id=_id,name=name,surname="")
+    def __init__(self, _id, name, surname, team: Teams, rank_score, last_results):
+        super().__init__(_id=_id,name=name,surname=surname)
 
         self.team: Teams = team
         self.rank_score = 1000 if rank_score is None else rank_score
@@ -33,7 +32,7 @@ class Player(User):
         """serialize Player class"""
         return {
             "id": self.id,
-            "name": self.name,
+            "name": " ".join(filter(None, [self.name, self.surname])),
             "team": self.team,
             "score": self.rank_score,
             "last_results": self.last_results

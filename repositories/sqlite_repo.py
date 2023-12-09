@@ -57,7 +57,7 @@ class SQLiteRepository(Repository):
     def get_players(self, query: str) -> list[Player]:
         """Restituisce la lista di giocatori (Player)"""
         self.cursor.execute("""
-            SELECT users.id, users.name, user_ranks.points, user_ranks.last_results
+            SELECT users.id, users.name, users.surname, user_ranks.points, user_ranks.last_results
             FROM users
             LEFT JOIN user_ranks ON (users.id = user_ranks.user_id)
             WHERE name LIKE ?
@@ -70,16 +70,17 @@ class SQLiteRepository(Repository):
             players_list.append(Player(
                 result[0],
                 result[1],
-                None,
                 result[2],
-                result[3]
+                None,
+                result[3],
+                result[4]
             ))
 
         return players_list
 
     def get_player(self, user_id: int, team: Teams) -> Player:
         self.cursor.execute("""
-            SELECT users.name, user_ranks.points, user_ranks.last_results
+            SELECT users.name, users.surname, user_ranks.points, user_ranks.last_results
             FROM users
             LEFT JOIN user_ranks ON (users.id = user_ranks.user_id)
             WHERE users.id = ?
@@ -91,19 +92,20 @@ class SQLiteRepository(Repository):
         return Player(
             user_id,
             result[0],
-            team,
             result[1],
-            result[2]
+            team,
+            result[2],
+            result[3]
         )
 
     def get_players_by_game(self, game_id: int) -> list[Player]:
         """Restituisce la lista di giocatori (Player) di un match"""
         self.cursor.execute("""
-            SELECT games.id, user_games.user_id, user_games.team, user_ranks.points, user_ranks.last_results
-            FROM games
-            LEFT JOIN user_games ON (games.id = user_games.game_id)
+            SELECT user_games.user_id, users.name, users.surname, user_games.team, user_ranks.points, user_ranks.last_results
+            FROM user_games
+            LEFT JOIN users ON (user_games.user_id = users.id)
             LEFT JOIN user_ranks ON (user_games.user_id = user_ranks.user_id)
-            WHERE games.id = ?
+            WHERE user_games.game_id = ?
             """,
             (game_id,)
         )
@@ -111,11 +113,12 @@ class SQLiteRepository(Repository):
         players_list = []
         for result in self.cursor.fetchall():
             players_list.append(Player(
+                result[0],
                 result[1],
-                "devi modificare la query per recuperare il nome",
                 result[2],
                 result[3],
-                result[4]
+                result[4],
+                result[5]
             ))
 
         return players_list
