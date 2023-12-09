@@ -54,13 +54,15 @@ class SQLiteRepository(Repository):
             (state, final_result, game_id))
         self.connection.commit()
 
-    def get_players(self) -> list[Player]:
+    def get_players(self, query: str) -> list[Player]:
         """Restituisce la lista di giocatori (Player)"""
         self.cursor.execute("""
             SELECT users.id, users.name, user_ranks.points, user_ranks.last_results
             FROM users
             LEFT JOIN user_ranks ON (users.id = user_ranks.user_id)
-            """
+            WHERE name LIKE ?
+            """,
+            ("%"+query+"%",)
         )
 
         players_list = []
