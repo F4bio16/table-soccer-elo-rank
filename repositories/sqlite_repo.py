@@ -60,8 +60,9 @@ class SQLiteRepository(Repository):
             SELECT users.id, users.name, user_ranks.points, user_ranks.last_results
             FROM users
             LEFT JOIN user_ranks ON (users.id = user_ranks.user_id)
-            WHERE name LIKE '%"""+query+"""%'
-            """
+            WHERE name LIKE ?
+            """,
+            ("%"+query+"%",)
         )
 
         players_list = []
