@@ -41,3 +41,11 @@ class Repository(ABC):
     @abstractmethod
     def update_user_rank(self, user_id: int, points: int, last_results: int(8)):
         """Update user rank"""
+
+    @abstractmethod
+    def get_match(self, match_id: int):
+        """return match by ID"""
+
+    @abstractmethod
+    def get_last_matches(self, limit: int):
+        """return list of recent match"""

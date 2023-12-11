@@ -4,6 +4,7 @@ from time import time
 
 from models.game import GameState
 from models.player import Player, Teams
+from models.match import Match
 
 from repositories.repository import Repository
 
@@ -149,3 +150,43 @@ class SQLiteRepository(Repository):
             (rank_score, game_id, user_id)
         )
         self.connection.commit()
+
+    def get_match(self, match_id: int):
+        """Get match by ID"""
+        self.cursor.execute("""
+            SELECT id, state, final_result, expected_scores
+            FROM games
+            where id = ?
+            """,
+            (match_id,))
+
+        result = self.cursor.fetchone()
+        return Match.get_instance(
+            result[0],
+            result[1],
+            result[2],
+            result[3]
+        )
+
+    def get_last_matches(self, limit: int):
+        """Recupera gli ultimi 10 match giocati"""
+
+        self.cursor.execute("""
+            SELECT games.id, games.state, games.final_result, games.expected_scores
+            FROM games
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (limit,)
+        )
+
+        matches = []
+        for result in self.cursor.fetchall():
+            matches.append(
+                Match.get_instance(
+                    result[0],
+                    result[1],
+                    result[2],
+                    result[3]
+                ))
+        return matches
