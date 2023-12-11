@@ -4,6 +4,7 @@ from repositories.sqlite_repo import SQLiteRepository
 from services.game_service import GameService
 
 from api.v1 import v1_route
+from api import webclient_route
 
 WEBSERVICE_NAME = "elo_ranking"
 
@@ -17,6 +18,7 @@ class HttpWebService:
         self.server.register_blueprint(
             v1_route.init(WEBSERVICE_NAME, self.sqlite_repository, self.game_service)
         )
+        self.server.register_blueprint(webclient_route.init(WEBSERVICE_NAME))
 
     def start(self, listening_port):
         """staring WebServer to listening_port"""
