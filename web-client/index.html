@@ -263,7 +263,7 @@
         $.ajax({
           type: "GET",
           contentType: "application/json",
-          url: endpoint + "/matches/",
+          url: endpoint + "/matches/?limit=10",
           success: function(data) {
             $latest_table = $('#latest_matches')
             $latest_table.html('')
