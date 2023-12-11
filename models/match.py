@@ -4,6 +4,9 @@ from config.exceptions import EloException
 
 class Match:
     """Match Class"""
+    state = None
+    final_result = None
+    expected_score = None
 
     def __init__(self, game_id: int, players: list[Player]):
         self.game_id = game_id
@@ -28,6 +31,28 @@ class Match:
         for player in players:
             self.opponents[player.team]["players"].append(player)
             self.opponents[player.team]["team_points"] += player.rank_score
+
+    @staticmethod
+    def get_instance(_id: int, state, final_result, expected_score):
+        """get match instance"""
+        match = Match(_id, [])
+        match.state = state
+        match.final_result = final_result
+        match.expected_score = expected_score
+
+        return match
+
+    def set_player(self, player: Player, team: Teams):
+        """set player"""
+
+        _team = None
+        if team is None:
+            _team = player.team
+        else:
+            _team = team
+
+        self.opponents[_team]["players"].append(player)
+        self.opponents[_team]["team_points"] += player.rank_score
 
     def set_expected_score(self, team: Teams, expected_score):
         """set expected score value"""

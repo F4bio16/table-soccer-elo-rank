@@ -6,6 +6,7 @@ from services.game_service import GameService
 
 from models.player import Teams
 from models.match import Match
+from models.game import GameState
 
 def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
     match_bp = Blueprint('match_bp', webservice_name, url_prefix="/matches")
@@ -40,6 +41,10 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
         """terminate match and set result"""
 
         print(f"called complete_match api with match_id {match_id}")
+
+        if repo.get_match(int(match_id)).state is not GameState.INITIAL:
+            return '', 403
+
         data = request.json
         data.get("red_result")
 
@@ -52,6 +57,32 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
 
         return jsonify({
             "player_scores": [player.toJSON() for player in player_scores]
+        })
+
+    @match_bp.route('/', methods=['GET'])
+    def get_matches():
+        """Visualizzo gli ultimi match giocati"""
+
+        limit = request.args.get('limit', default=10, type=int)
+        last_matches = repo.get_last_matches(limit)
+
+        results = []
+        for match in last_matches:
+            for player in repo.get_players_by_game(match.game_id):
+                match.set_player(player, None)
+            results.append(match)
+
+        return jsonify({
+            "matches": [{
+                "id": result.game_id,
+                "state": result.state,
+                "red_score": int(result.final_result.split(":")[0])
+                    if result.final_result is not None else None,
+                "blue_score": int(result.final_result.split(":")[1])
+                    if result.final_result is not None else None,
+                "red_players": [player.toJSON() for player in result.opponents[Teams.RED.value]["players"]],
+                "blue_players": [player.toJSON() for player in result.opponents[Teams.BLUE.value]["players"]]
+            } for result in results]
         })
 
     return match_bp
