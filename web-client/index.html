@@ -47,7 +47,7 @@
         </div>
       </div>
     </div>
-    <div class="modal" tabindex="-1" id="add_result">
+    <div class="modal modal-lg" tabindex="-1" id="add_result">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -230,7 +230,7 @@
           $.ajax({
             type: "POST",
             contentType: "application/json",
-            url: endpoint + "/matches/"+$('.match_id').text() +"/complete",
+            url: endpoint + "/matches/"+$('.match_id').first().text() +"/complete",
             data: JSON.stringify({
               "red_result": parseInt($('.red_goals').val()), 
               "blue_result": parseInt($('.blue_goals').val()), 
