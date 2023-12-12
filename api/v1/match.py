@@ -42,7 +42,7 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
 
         print(f"called complete_match api with match_id {match_id}")
 
-        if repo.get_match(int(match_id)).state is not GameState.INITIAL:
+        if repo.get_match(int(match_id)).state != GameState.INITIAL.value:
             return '', 403
 
         data = request.json
