@@ -256,10 +256,25 @@
               $(modal_content).append('</ul>')
               let myModal = new bootstrap.Modal(document.getElementById("rankings"), {});
               myModal.show();
+              updateLatest();
             }
           });
         });
 
+        updateLatest();
+
+        let resultModal = false
+        $( "body" ).on( "click", "button.add_match_result", function(e) {
+          e.preventDefault()
+          let match_id = parseInt($(this).parent().parent().attr('data-match-id'))
+          $('.match_id').text(match_id)
+          resultModal = new bootstrap.Modal(document.getElementById("add_result"), {});
+          resultModal.show();
+        })
+
+      })
+
+      function updateLatest(){ 
         $.ajax({
           type: "GET",
           contentType: "application/json",
@@ -281,17 +296,7 @@
             });
           }
         });
-        let resultModal = false
-        $( "body" ).on( "click", "button.add_match_result", function(e) {
-          e.preventDefault()
-          let match_id = parseInt($(this).parent().parent().attr('data-match-id'))
-          $('.match_id').text(match_id)
-          resultModal = new bootstrap.Modal(document.getElementById("add_result"), {});
-          resultModal.show();
-        })
-
-      })
-
+      }
 
       async function fetchSource( query ) {
           // const res  = await fetch( `[url]?query=${encodeURIComponent( query )}` );

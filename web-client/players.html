@@ -55,7 +55,8 @@
             <thead>
               <th>ID</th>
               <th>Nome</th>
-              <th>Score</th>
+              <th>Punteggio</th>
+              <th>Ultime partite</th>
             </thead>
             <tbody id="players_list">
               
@@ -96,10 +97,19 @@
           contentType: "application/json",
           success: function(data) {  
             $.each(data, function( index, value ) {
+              let latest = '<div class="progress">';
+              let latest_size = 100 / value['last_results'].length
+              $.each(value['last_results'], function( index, value ) {
+                w_or_l = value ? 'W' : 'L'
+                success_or_danger = value ? 'bg-success' : 'bg-danger'
+                latest = latest + '<div class="progress-bar '+success_or_danger+'" role="progressbar" style="width: '+latest_size+'%;" aria-valuenow="'+latest_size+'" aria-valuemin="0" aria-valuemax="100">'+w_or_l+'</div>'
+              })
+              latest = latest + "</div>";
               let row = "<tr>\
                 <td class='id'>"+ value['id']+"</td>\
                 <td class='name'>"+value['name']+"</td>\
                 <td class='score'>"+value['score']+"</td>\
+                <td class='latest'>"+latest+"</td>\
               </tr>"
               $('#players_list').append(row)
             });
