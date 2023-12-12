@@ -28,6 +28,11 @@ class Player(User):
 
         return self.rank_score
 
+    def get_last_results(self, length):
+        """return an array of last match result of the player"""
+
+        return [ self.last_results & (1 << i) != 0 for i in range(length)]
+
     def toJSON(self):
         """serialize Player class"""
         return {
@@ -35,5 +40,5 @@ class Player(User):
             "name": " ".join(filter(None, [self.name, self.surname])),
             "team": self.team,
             "score": self.rank_score,
-            "last_results": self.last_results
+            "last_results": self.get_last_results(5)
         }
