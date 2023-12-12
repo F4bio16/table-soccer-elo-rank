@@ -1,5 +1,6 @@
 """player model"""
 from enum import Enum
+import math
 
 from models.user import User
 
@@ -31,7 +32,10 @@ class Player(User):
     def get_last_results(self, length):
         """return an array of last match result of the player"""
 
-        return [ self.last_results & (1 << i) != 0 for i in range(length)]
+        results_count = int(math.log(self.last_results, 2))
+        max_results = length if results_count > length else results_count
+
+        return [ (self.last_results & results_count) & (1 << i) != 0 for i in range(max_results)]
 
     def toJSON(self):
         """serialize Player class"""
