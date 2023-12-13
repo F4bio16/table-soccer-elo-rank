@@ -42,21 +42,23 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
 
         print(f"called complete_match api with match_id {match_id}")
 
-        if repo.get_match(int(match_id)).state != GameState.INITIAL.value:
-            return '', 403
+        match = repo.get_match(int(match_id))
+        if match.state != GameState.INITIAL.value:
+            return 'Unable to close match with invalid state', 403
 
         data = request.json
-        data.get("red_result")
 
-        match = Match(int(match_id), repo.get_players_by_game(int(match_id)))
+        _players = repo.get_players_by_game(match.game_id)
+        for player in _players:
+            match.set_player(player, None)
 
-        player_scores = game_service.game_end(
+        final_scores = game_service.game_end(
             match,
             data.get("red_result"), data.get("blue_result")
         )
 
         return jsonify({
-            "player_scores": [player.toJSON() for player in player_scores]
+            "player_scores": [player.toJSON() for player in final_scores]
         })
 
     @match_bp.route('/', methods=['GET'])

@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 
 from models.player import Player, Teams
+from models.match import Match
 
 class Repository(ABC):
     """Repository Abstract Class"""
@@ -29,6 +30,10 @@ class Repository(ABC):
     @abstractmethod
     def update_game(self, game_id: int, state, final_result):
         """method for update game record"""
+
+    @abstractmethod
+    def game_set_expected_scores(self, match: Match):
+        """method for set expected_scores of a match"""
 
     @abstractmethod
     def get_player(self, user_id: int, team: Teams) -> Player:
