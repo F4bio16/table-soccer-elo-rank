@@ -67,9 +67,15 @@ class SQLiteRepository(Repository):
     def get_players(self, query: str) -> list[Player]:
         """Restituisce la lista di giocatori (Player)"""
         self.cursor.execute("""
-            SELECT users.id, users.name, users.surname, user_ranks.points, user_ranks.last_results
+            SELECT
+            users.id,
+            users.name,
+            users.surname,
+            ur.points,
+            ur.last_results,
+            (SELECT COUNT(DISTINCT points) from user_ranks WHERE points > ur.points AND last_results != 1) +1
             FROM users
-            LEFT JOIN user_ranks ON (users.id = user_ranks.user_id)
+            LEFT JOIN user_ranks ur ON (users.id = ur.user_id)
             WHERE name LIKE ?
             """,
             ("%"+query+"%",)
@@ -83,7 +89,8 @@ class SQLiteRepository(Repository):
                 result[2],
                 None,
                 result[3],
-                result[4]
+                result[4],
+                result[5]
             ))
 
         return players_list
@@ -111,10 +118,17 @@ class SQLiteRepository(Repository):
     def get_players_by_game(self, game_id: int) -> list[Player]:
         """Restituisce la lista di giocatori (Player) di un match"""
         self.cursor.execute("""
-            SELECT user_games.user_id, users.name, users.surname, user_games.team, user_ranks.points, user_ranks.last_results
+            SELECT
+                user_games.user_id,
+                users.name,
+                users.surname,
+                user_games.team,
+                ur.points,
+                ur.last_results,
+                (SELECT COUNT(DISTINCT points) from user_ranks WHERE points > ur.points) +1
             FROM user_games
             LEFT JOIN users ON (user_games.user_id = users.id)
-            LEFT JOIN user_ranks ON (user_games.user_id = user_ranks.user_id)
+            LEFT JOIN user_ranks ur ON (user_games.user_id = ur.user_id)
             WHERE user_games.game_id = ?
             """,
             (game_id,)
