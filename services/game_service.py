@@ -34,6 +34,9 @@ class GameService:
                     match.get_team_points(Teams.RED.value)
             ))
 
+            # save expected score of the match
+            self.repo.game_set_expected_scores(match)
+
             for player in players:
                 self.repo.create_usergame(game_id, player.id, player.team)
 
@@ -55,18 +58,6 @@ class GameService:
             - aggiorniamo il rank dei giocatori
         """
 
-        match.set_expected_score(Teams.RED.value,
-            self.rank_service.calculate_expected_score(
-                match.get_team_points(Teams.RED.value),
-                match.get_team_points(Teams.BLUE.value)
-        ))
-
-        match.set_expected_score(Teams.BLUE.value,
-            self.rank_service.calculate_expected_score(
-                match.get_team_points(Teams.BLUE.value),
-                match.get_team_points(Teams.RED.value)
-        ))
-
         winner = Teams.RED.value if team_red_score > team_blue_score else Teams.BLUE.value
         players = self.repo.get_players_by_game(match.game_id)
 
@@ -76,9 +67,9 @@ class GameService:
             f"{team_red_score}:{team_blue_score}"
         )
 
-        total_rank_scores = {Teams.RED.value: 0, Teams.BLUE.value: 0}
-        for player in players:
-            total_rank_scores[player.team] += player.rank_score
+        # total_rank_scores = {Teams.RED.value: 0, Teams.BLUE.value: 0}
+        # for player in players:
+        #     total_rank_scores[player.team] += player.rank_score
 
         match.finish((team_red_score, team_blue_score))
 

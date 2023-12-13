@@ -38,7 +38,11 @@ class Match:
         match = Match(_id, [])
         match.state = state
         match.final_result = final_result
-        match.expected_score = expected_score
+
+        if expected_score is not None:
+            str_expected_score = expected_score.split("|")
+            match.set_expected_score(Teams.RED.value, float(str_expected_score[0]))
+            match.set_expected_score(Teams.BLUE.value, float(str_expected_score[1]))
 
         return match
 

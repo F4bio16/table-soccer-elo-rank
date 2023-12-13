@@ -55,6 +55,15 @@ class SQLiteRepository(Repository):
             (state, final_result, game_id))
         self.connection.commit()
 
+    def game_set_expected_scores(self, match: Match):
+        self.cursor.execute(
+            "UPDATE games SET expected_scores = ? WHERE id = ?", (
+            f"""{match.get_expected_score(Teams.RED.value)}|{
+            match.get_expected_score(Teams.BLUE.value)}""",
+            match.game_id)
+        )
+        self.connection.commit()
+
     def get_players(self, query: str) -> list[Player]:
         """Restituisce la lista di giocatori (Player)"""
         self.cursor.execute("""

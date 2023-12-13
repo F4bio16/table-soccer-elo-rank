@@ -19,28 +19,5 @@ repo.connect()
 
 game_service = GameService(repo, rank_service)
 
-# players = [
-#   repo.get_player(1, Teams.RED.value),
-#   repo.get_player(2, Teams.RED.value),
-#   repo.get_player(5, Teams.BLUE.value),
-#   repo.get_player(6, Teams.BLUE.value)
-# ]
-
-# match = game_service.game_start(players)
-# print(f"""
-#   Created game ID {match.game_id}
-#   {" --- ".join([f"ID#{player.id} {player.name} {player.rank_score} {player.team}" for player in players])}
-
-#   Expected result:
-#     RED wins for {match.get_expected_score(Teams.RED.value) * 100} % ({match.get_team_points(Teams.RED.value)} points)
-#     BLUE wins for {match.get_expected_score(Teams.BLUE.value) * 100} % ({match.get_team_points(Teams.BLUE.value)} points)
-#   """)
-
-# updated_players = game_service.game_end(match, 1, 11)
-
-# print(f"Game {match.game_id} ended")
-# for player in updated_players:
-#     print(f"  - Player #{player.id} Score: {player.rank_score}")
-
 http_service = HttpWebService(repo, game_service)
 http_service.start(5000)
