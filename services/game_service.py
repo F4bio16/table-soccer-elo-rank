@@ -67,10 +67,6 @@ class GameService:
             f"{team_red_score}:{team_blue_score}"
         )
 
-        # total_rank_scores = {Teams.RED.value: 0, Teams.BLUE.value: 0}
-        # for player in players:
-        #     total_rank_scores[player.team] += player.rank_score
-
         match.finish((team_red_score, team_blue_score))
 
         match.set_match_points(
@@ -91,9 +87,10 @@ class GameService:
         )
 
         for player in players:
-            player.add_result(True if (winner == player.team) else False)
+            player.add_result(winner == player.team)
 
             match_point = match.opponents[player.team]["match_points"]
+
             player.add_rank_score(match_point)
             self.repo.update_user_rank(player.id, player.rank_score, player.last_results)
             self.repo.close_user_game(match.game_id, player.id, match_point)

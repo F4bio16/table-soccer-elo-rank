@@ -84,6 +84,10 @@ class Match:
         self.opponents[Teams.RED.value]["match_points"] = points[0]
         self.opponents[Teams.BLUE.value]["match_points"] = points[1]
 
+    def get_match_points(self, team: Teams):
+        """return the points earned with the match"""
+
+        return self.opponents[team]["match_points"]
 
     def get_winner_opponent(self):
         """retrieve the winner opponent of the match"""
