@@ -27,7 +27,7 @@
           <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
             <li><a href="{{ url_for('webclient.index') }}" class="nav-link px-2 text-white">Home</a></li>
             <li><a href="{{ url_for('webclient.player_list') }}" class="nav-link px-2 text-secondary">Giocatori</a></li>
-            <li><a href="/matches.html" class="nav-link px-2 text-white">Partite</a></li>
+            <li><a href="#" class="nav-link px-2 text-white">Partite</a></li>
           </ul>
         </div>
       </div>
@@ -54,6 +54,7 @@
           <table class="table table-striped table-hover">
             <thead>
               <th>ID</th>
+              <th>Posizione</th>
               <th>Nome</th>
               <th>Punteggio</th>
               <th>Ultime partite</th>
@@ -97,21 +98,25 @@
           contentType: "application/json",
           success: function(data) {  
             $.each(data, function( index, value ) {
-              let latest = '<div class="progress">';
-              let latest_size = 100 / value['last_results'].length
-              $.each(value['last_results'], function( index, value ) {
-                w_or_l = value ? 'W' : 'L'
-                success_or_danger = value ? 'bg-success' : 'bg-danger'
-                latest = latest + '<div class="progress-bar '+success_or_danger+'" role="progressbar" style="width: '+latest_size+'%;" aria-valuenow="'+latest_size+'" aria-valuemin="0" aria-valuemax="100">'+w_or_l+'</div>'
-              })
-              latest = latest + "</div>";
-              let row = "<tr>\
-                <td class='id'>"+ value['id']+"</td>\
-                <td class='name'>"+value['name']+"</td>\
-                <td class='score'>"+value['score']+"</td>\
-                <td class='latest'>"+latest+"</td>\
-              </tr>"
-              $('#players_list').append(row)
+              if (value['rank_position'] !== null){
+                let latest = '<div class="progress">';
+                let latest_size = 100 / value['last_results'].length
+                $.each(value['last_results'], function( index, value ) {
+                  w_or_l = value ? 'W' : 'L'
+                  success_or_danger = value ? 'bg-success' : 'bg-danger'
+                  latest = latest + '<div class="progress-bar '+success_or_danger+'" role="progressbar" style="width: '+latest_size+'%;" aria-valuenow="'+latest_size+'" aria-valuemin="0" aria-valuemax="100">'+w_or_l+'</div>'
+                })
+                latest = latest + "</div>";
+                rank_position = value['rank_position'] == null ? '-' : value['rank_position']
+                let row = "<tr>\
+                  <td class='id'>"+ value['id']+"</td>\
+                  <td class='ranking'><span class='badge bg-secondary'>"+ rank_position +"</span></td>\
+                  <td class='name'>"+value['name']+"</td>\
+                  <td class='score'>"+value['score']+"</td>\
+                  <td class='latest'>"+latest+"</td>\
+                </tr>"
+                $('#players_list').append(row)
+              }
             });
           }
         });
