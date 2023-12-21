@@ -5,7 +5,6 @@ from repositories.sqlite_repo import SQLiteRepository
 from services.game_service import GameService
 
 from models.player import Teams
-from models.match import Match
 from models.game import GameState
 
 def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
@@ -18,6 +17,9 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
 
         red_team_player_ids = data.get('red_team')
         blue_team_player_ids = data.get('blue_team')
+
+        if len(set(red_team_player_ids + blue_team_player_ids)) != 4:
+            return 'There must be 2 unique players per team', 400
 
         players = []
 
