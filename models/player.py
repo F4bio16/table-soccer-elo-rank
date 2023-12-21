@@ -40,7 +40,7 @@ class Player(User):
         results_count = int(math.log(self.last_results, 2))
         max_results = length if results_count > length else results_count
 
-        return [ self.last_results & (1 << i) != 0 for i in range(max_results)]
+        return [ self.last_results & (1 << i) != 0 for i in range(max_results)][::-1]
 
     def toJSON(self):
         """serialize Player class"""

@@ -76,9 +76,9 @@ class SQLiteRepository(Repository):
             (SELECT COUNT(DISTINCT points) from user_ranks WHERE points > ur.points AND last_results != 1) +1
             FROM users
             LEFT JOIN user_ranks ur ON (users.id = ur.user_id)
-            WHERE name LIKE ?
+            WHERE name LIKE ? OR surname LIKE ?
             """,
-            ("%"+query+"%",)
+            ("%"+query+"%","%"+query+"%")
         )
 
         players_list = []
