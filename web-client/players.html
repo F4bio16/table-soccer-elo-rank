@@ -54,7 +54,7 @@
           <table class="table table-striped table-hover">
             <thead>
               <th>ID</th>
-              <th>Posizione</th>
+              <th>Pos.</th>
               <th>Nome</th>
               <th>Punteggio</th>
               <th>Ultime partite</th>
@@ -100,7 +100,7 @@
             $.each(data, function( index, value ) {
               if (value['rank_position'] !== null){
                 let latest = '<div class="progress">';
-                let latest_size = 100 / value['last_results'].length
+                let latest_size = 20
                 $.each(value['last_results'], function( index, value ) {
                   w_or_l = value ? 'W' : 'L'
                   success_or_danger = value ? 'bg-success' : 'bg-danger'
