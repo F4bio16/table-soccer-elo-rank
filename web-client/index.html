@@ -112,7 +112,7 @@
                   <label for="blue_goals" class="col-form-label">Blu</label>
                 </div>
                 <div class="col-auto">
-                  <input type="number" id="blue_goals" class="form-control" aria-describedby="blueGoals">
+                  <input type="number" class="blue_goals" class="form-control" aria-describedby="blueGoals">
                 </div>
                 <div class="col-auto">
                   <span class="form-text">
@@ -120,7 +120,7 @@
                   </span>
                 </div>
                 <div class="col-auto">
-                  <input type="number" id="red_goals" class="form-control" aria-describedby="redGoals">
+                  <input type="number" class="red_goals" class="form-control" aria-describedby="redGoals">
                 </div>
                 <div class="col-auto">
                   <label for="red_goals" class="col-form-label">Rossi</label>
@@ -161,7 +161,7 @@
               <th>#</th>
               <th>Squadra Blu</th>
               <th>Squadra Rossa</th>
-              <th class="center" width="120">Score</th>
+              <th class="center" width="150">Score</th>
             </thead>
             <tbody id="latest_matches">
               
@@ -211,6 +211,7 @@
               "blue_team": blue_team
             }),
             success: function(data) {  
+              updateLatest();
               $('#new_match').hide()
               $('#match_odds').show()
               blue_perc = Math.round(data.expected_scores.blue_wins * 100)
@@ -232,13 +233,14 @@
 
         $( "body" ).on( "click", "button.submit_result", function(e) {
           e.preventDefault()
+          $parent_form =  $(this).closest('form')[0]
           $.ajax({
             type: "POST",
             contentType: "application/json",
             url: endpoint + "/matches/"+$('.match_id').first().text() +"/complete",
             data: JSON.stringify({
-              "red_result": parseInt($('.red_goals').val()), 
-              "blue_result": parseInt($('.blue_goals').val()), 
+              "red_result": parseInt($($parent_form).find('.red_goals').val()), 
+              "blue_result": parseInt($($parent_form).find('.blue_goals').val()), 
             }),
             success: function(data) {
               if(resultModal){
