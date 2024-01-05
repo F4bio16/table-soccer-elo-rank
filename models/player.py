@@ -26,7 +26,10 @@ class Player(User):
 
     def add_result(self, is_winner: bool):
         """update last_results attribute"""
-        self.last_results = (self.last_results << 1) | (1 if is_winner is True else 0)
+        sqlite_max_integer = 2**63
+        result = (self.last_results << 1) | (1 if is_winner is True else 0)
+
+        self.last_results = (sqlite_max_integer -1) & result
 
     def add_rank_score(self, score):
         """sum score to the player rank_score"""
@@ -37,7 +40,7 @@ class Player(User):
     def get_last_results(self, length):
         """return an array of last match result of the player"""
 
-        results_count = int(math.log(self.last_results, 2))
+        results_count = self.last_results.bit_length()
         max_results = length if results_count > length else results_count
 
         return [ self.last_results & (1 << i) != 0 for i in range(max_results)][::-1]
