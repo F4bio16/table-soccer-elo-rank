@@ -14,4 +14,8 @@ def init(webservice_name):
     def player_list():
         return render_template('players.html')
 
+    @blueprint.route('/matches')
+    def matches_list():
+        return render_template('matches.html')
+
     return blueprint
