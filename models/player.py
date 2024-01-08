@@ -40,7 +40,7 @@ class Player(User):
     def get_last_results(self, length):
         """return an array of last match result of the player"""
 
-        results_count = self.last_results.bit_length()
+        results_count = self.last_results.bit_length() - 1
         max_results = length if results_count > length else results_count
 
         return [ self.last_results & (1 << i) != 0 for i in range(max_results)][::-1]
