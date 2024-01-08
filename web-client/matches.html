@@ -36,10 +36,63 @@
         </div>
       </div>
     </header>
+    <div class="modal" tabindex="-1" id="rankings">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Punteggi aggiornati</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="container">
+      <div class="modal modal-lg" tabindex="-1" id="add_result">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Inserisci risultato match #<span class="match_id"></span></h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form class="submit_result" class="ps-5 pb-5">
+                <div class="row g-3 align-items-center">
+                  <div class="col-auto">
+                    <label for="blue_goals" class="col-form-label">Blu</label>
+                  </div>
+                  <div class="col-auto">
+                    <input type="number" class="blue_goals" class="form-control" aria-describedby="blueGoals">
+                  </div>
+                  <div class="col-auto">
+                    <span class="form-text">
+                      -
+                    </span>
+                  </div>
+                  <div class="col-auto">
+                    <input type="number" class="red_goals" class="form-control" aria-describedby="redGoals">
+                  </div>
+                  <div class="col-auto">
+                    <label for="red_goals" class="col-form-label">Rossi</label>
+                  </div>
+                </div>
+                <br>
+                <button class="btn btn-secondary submit_result">Inserisci risultato</button>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="row pb-5">
         <div class="col-lg-10 offset-lg-1 white-box">
-          <h2>Partite</h2>
+          <h2>Storico partite</h2>
           <table class="table table-striped table-hover">
             <thead>
               <th class="center">#</th>
@@ -80,9 +133,100 @@
           console = {};
         }
 
+        $( "body" ).on( "click", ".match_submit", function(e) {
+          e.preventDefault()
+          $.ajax({
+            type: "POST",
+            url: endpoint + "/matches/start",
+            contentType: "application/json",
+            data: JSON.stringify({
+              "red_team": red_team,
+              "blue_team": blue_team
+            }),
+            success: function(data) {
+              updateLatest();
+              $('#new_match').hide()
+              $('#match_odds').show()
+              blue_perc = Math.round(data.expected_scores.blue_wins * 100)
+              red_perc = Math.round(data.expected_scores.red_wins * 100)
+              $('.match_id').text(data.game_id)
+              $('#match_expectations .bg-primary').attr({
+                style: 'width: ' + blue_perc + '%',
+                'aria-valuenow': blue_perc,
+              });
+              $('#match_expectations .bg-primary').text(blue_perc + "%")
+              $('#match_expectations .bg-danger').attr({
+                style: 'width: ' + red_perc + '%',
+                'aria-valuenow': red_perc,
+              });
+              $('#match_expectations .bg-danger').text(red_perc + "%")
+            },
+            error: function(error){
+              let alert_content = '<div class="error_response_alert alert alert-danger alert-dismissible fade show" role="alert">\
+                                    <strong class="error_response">'+error.responseText+'</strong>\
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>\
+                                  </div>'
+              $('.alert_container').html(alert_content)
+            }
+          });
+        });
+
+        $( "body" ).on( "click", "button.submit_result", function(e) {
+          e.preventDefault()
+          $parent_form =  $(this).closest('form')[0]
+          $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: endpoint + "/matches/"+$('.match_id').first().text() +"/complete",
+            data: JSON.stringify({
+              "red_result": parseInt($($parent_form).find('.red_goals').val()),
+              "blue_result": parseInt($($parent_form).find('.blue_goals').val()),
+            }),
+            success: function(data) {
+              if(resultModal){
+                resultModal.hide();
+              }
+              $('.red_goals').val('')
+              $('.blue_goals').val('')
+              $('#my-autocomplete-container1 input').val('')
+              $('#my-autocomplete-container2 input').val('')
+              $('#my-autocomplete-container3 input').val('')
+              $('#my-autocomplete-container4 input').val('')
+              $('#new_match').show()
+              $('#match_odds').hide()
+              let modal_content = $('#rankings .modal-body')
+              $(modal_content).html('')
+              let result_text = '<ul class="list-group">';
+              let players_scores_sorted = data['player_scores'].sort(sortByRank).reverse();
+              $.each(players_scores_sorted, function( index, value ) {
+                let team_color = value["team"] == "__red__" ? "bg-danger" : "bg-primary"
+                result_text = result_text + "<li class='list-group-item text-white "+team_color+"'><b>"+value['name']+"</b>: "+value['score']+" ("+value['score_delta']+")</li>"
+              });
+              result_text = result_text + '</ul>';
+              $(modal_content).append(result_text)
+              let myModal = new bootstrap.Modal(document.getElementById("rankings"), {});
+              myModal.show();
+              updateLatest();
+            }
+          });
+        });
+
         updateLatest();
 
+        let resultModal = false
+        $( "body" ).on( "click", "button.add_match_result", function(e) {
+          e.preventDefault()
+          let match_id = parseInt($(this).parent().parent().attr('data-match-id'))
+          $('.match_id').text(match_id)
+          resultModal = new bootstrap.Modal(document.getElementById("add_result"), {});
+          resultModal.show();
+        })
+
       })
+
+      function sortByRank(a, b) {
+        return a.score - b.score;
+      }
 
       function updateLatest(){
         $.ajax({
@@ -90,8 +234,8 @@
           contentType: "application/json",
           url: endpoint + "/matches/?limit=100",
           success: function(data) {
-            $latest_table = $('#all_matches')
-            $latest_table.html('')
+            $all_table = $('#all_matches')
+            $all_table.html('')
             $.each(data['matches'], function( index, value ) {
 
               let blue_score_colored = "<span class='badge bg-success'>"+value['blue_score']+"</span>"
@@ -114,7 +258,7 @@
                 }
                 row = row + "<td class='center'><span class='badge bg-danger'>"+value['red_players'][0]['name']+"</span><span class='badge bg-danger'>"+value['red_players'][1]['name']+"</span></td></tr>"
 
-              $latest_table.append(row)
+              $all_table.append(row)
             });
           }
         });
