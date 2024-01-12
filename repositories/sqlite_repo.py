@@ -13,8 +13,6 @@ class SQLiteRepository(Repository):
     def __init__(self, configs):
         self.is_connected = False
         self.connection = None
-        self.cursor = None
-
         self.configs = configs
 
     def connect(self):
@@ -24,39 +22,43 @@ class SQLiteRepository(Repository):
             print("Connecting to datasource")
 
         self.connection = sqlite3.connect(self.configs["DB_NAME"], check_same_thread=False)
-        self.cursor = self.connection.cursor()
-
         self.is_connected = True
 
     def create_user(self, name: str, surname: str):
-        self.cursor.execute("INSERT INTO users (name, surname) VALUES (?, ?)", (name, surname))
+        cursor = self.connection.cursor()
+        cursor.execute("INSERT INTO users (name, surname) VALUES (?, ?)", (name, surname))
         self.connection.commit()
 
-        return self.cursor.lastrowid
+        return cursor.lastrowid
 
     def create_game(self):
-        self.cursor.execute("INSERT INTO games ( state ) VALUES (?)", (GameState.INITIAL.value,))
+        cursor = self.connection.cursor()
+        cursor.execute("INSERT INTO games ( state ) VALUES (?)", (GameState.INITIAL.value,))
         self.connection.commit()
 
-        return self.cursor.lastrowid
+        return cursor.lastrowid
 
     def create_usergame(self, game_id: int, player_id: int, player_team: Teams):
-        self.cursor.execute("INSERT INTO user_games (user_id, game_id, team) VALUES (?, ?, ?)",
+        cursor = self.connection.cursor()
+        cursor.execute("INSERT INTO user_games (user_id, game_id, team) VALUES (?, ?, ?)",
             (player_id, game_id, player_team))
         self.connection.commit()
 
     def delete_game(self, game_id: int):
-        self.cursor.execute("DELETE FROM user_games WHERE game_id = ?", (game_id,))
-        self.cursor.execute("DELETE FROM games WHERE id = ?", (game_id,))
+        cursor = self.connection.cursor()
+        cursor.execute("DELETE FROM user_games WHERE game_id = ?", (game_id,))
+        cursor.execute("DELETE FROM games WHERE id = ?", (game_id,))
         self.connection.commit()
 
     def update_game(self, game_id: int, state, final_result):
-        self.cursor.execute("UPDATE games SET state = ?, final_result = ? WHERE id = ?",
+        cursor = self.connection.cursor()
+        cursor.execute("UPDATE games SET state = ?, final_result = ? WHERE id = ?",
             (state, final_result, game_id))
         self.connection.commit()
 
     def game_set_expected_scores(self, match: Match):
-        self.cursor.execute(
+        cursor = self.connection.cursor()
+        cursor.execute(
             "UPDATE games SET expected_scores = ? WHERE id = ?", (
             f"""{match.get_expected_score(Teams.RED.value)}|{
             match.get_expected_score(Teams.BLUE.value)}""",
@@ -66,7 +68,9 @@ class SQLiteRepository(Repository):
 
     def get_players(self, query: str) -> list[Player]:
         """Restituisce la lista di giocatori (Player)"""
-        self.cursor.execute("""
+
+        cursor = self.connection.cursor()
+        cursor.execute("""
             SELECT
             users.id,
             users.name,
@@ -82,7 +86,7 @@ class SQLiteRepository(Repository):
         )
 
         players_list = []
-        for result in self.cursor.fetchall():
+        for result in cursor.fetchall():
             players_list.append(Player(
                 result[0],
                 result[1],
@@ -96,7 +100,8 @@ class SQLiteRepository(Repository):
         return players_list
 
     def get_player(self, user_id: int, team: Teams) -> Player:
-        self.cursor.execute("""
+        cursor = self.connection.cursor()
+        cursor.execute("""
             SELECT users.name, users.surname, user_ranks.points, user_ranks.last_results
             FROM users
             LEFT JOIN user_ranks ON (users.id = user_ranks.user_id)
@@ -105,7 +110,7 @@ class SQLiteRepository(Repository):
             (user_id,)
         )
 
-        result = self.cursor.fetchone()
+        result = cursor.fetchone()
         return Player(
             user_id,
             result[0],
@@ -117,7 +122,9 @@ class SQLiteRepository(Repository):
 
     def get_players_by_game(self, game_id: int) -> list[Player]:
         """Restituisce la lista di giocatori (Player) di un match"""
-        self.cursor.execute("""
+
+        cursor = self.connection.cursor()
+        cursor.execute("""
             SELECT
                 user_games.user_id,
                 users.name,
@@ -135,7 +142,7 @@ class SQLiteRepository(Repository):
         )
 
         players_list = []
-        for result in self.cursor.fetchall():
+        for result in cursor.fetchall():
             players_list.append(Player(
                 result[0],
                 result[1],
@@ -149,16 +156,18 @@ class SQLiteRepository(Repository):
 
     def update_user_rank(self, user_id: int, points: int, last_results: int(8)):
         """Aggiorna il rank di un utente"""
-        self.cursor.execute("SELECT user_id FROM user_ranks WHERE user_id = ?", (user_id,))
 
-        if len(self.cursor.fetchall()) > 0:
-            self.cursor.execute("""
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT user_id FROM user_ranks WHERE user_id = ?", (user_id,))
+
+        if len(cursor.fetchall()) > 0:
+            cursor.execute("""
                 UPDATE user_ranks
                 SET points = ?, last_results = ?, updated_at = ?
                 WHERE user_id = ?
                 """, (points, last_results, time(), user_id))
         else:
-            self.cursor.execute("""
+            cursor.execute("""
                 INSERT INTO user_ranks (user_id, points, created_at, updated_at, last_results)
                 VALUES (?, ?, ?, ?, ?)
                 """, (user_id, points, time(), time(), last_results))
@@ -167,7 +176,8 @@ class SQLiteRepository(Repository):
     def close_user_game(self, game_id: int, user_id: int, rank_score: int):
         """Salva i punti vinti nel game"""
 
-        self.cursor.execute("""
+        cursor = self.connection.cursor()
+        cursor.execute("""
                 UPDATE user_games SET rank_score = ? WHERE game_id = ? AND user_id = ?
             """,
             (rank_score, game_id, user_id)
@@ -176,14 +186,16 @@ class SQLiteRepository(Repository):
 
     def get_match(self, match_id: int):
         """Get match by ID"""
-        self.cursor.execute("""
+
+        cursor = self.connection.cursor()
+        cursor.execute("""
             SELECT id, state, final_result, expected_scores
             FROM games
             where id = ?
             """,
             (match_id,))
 
-        result = self.cursor.fetchone()
+        result = cursor.fetchone()
         return Match.get_instance(
             result[0],
             result[1],
@@ -194,7 +206,8 @@ class SQLiteRepository(Repository):
     def get_last_matches(self, limit: int):
         """Recupera gli ultimi 10 match giocati"""
 
-        self.cursor.execute("""
+        cursor = self.connection.cursor()
+        cursor.execute("""
             SELECT games.id, games.state, games.final_result, games.expected_scores
             FROM games
             ORDER BY id DESC
@@ -204,7 +217,7 @@ class SQLiteRepository(Repository):
         )
 
         matches = []
-        for result in self.cursor.fetchall():
+        for result in cursor.fetchall():
             matches.append(
                 Match.get_instance(
                     result[0],
