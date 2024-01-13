@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 
 from models.player import Player, Teams
 from models.match import Match
+from models.user_game import UserGame
 
 class Repository(ABC):
     """Repository Abstract Class"""
@@ -20,8 +21,12 @@ class Repository(ABC):
         """method for create game record and return game_id"""
 
     @abstractmethod
-    def create_usergame(self, game_id: int, player_id: int, player_team):
+    def create_usergame(self, user_game: UserGame):
         """method for assign user to the game"""
+
+    @abstractmethod
+    def update_user_game(self, user_game: UserGame):
+        """method for update user_game entity"""
 
     @abstractmethod
     def delete_game(self, game_id: int):

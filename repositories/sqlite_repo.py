@@ -3,6 +3,7 @@ import sqlite3
 from time import time
 
 from models.game import GameState
+from models.user_game import UserGame
 from models.player import Player, Teams
 from models.match import Match
 
@@ -38,10 +39,40 @@ class SQLiteRepository(Repository):
 
         return cursor.lastrowid
 
-    def create_usergame(self, game_id: int, player_id: int, player_team: Teams):
+    def create_usergame(self, user_game: UserGame):
+        """Crea un nuovo user_game"""
+
         cursor = self.connection.cursor()
-        cursor.execute("INSERT INTO user_games (user_id, game_id, team) VALUES (?, ?, ?)",
-            (player_id, game_id, player_team))
+        cursor.execute("""
+            INSERT INTO user_games
+            (game_id, user_id, team, initial_score, earned_score)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                user_game.game_id,
+                user_game.user_id,
+                user_game.team,
+                user_game.initial_score,
+                user_game.earned_score
+            )
+        )
+        self.connection.commit()
+
+    def update_user_game(self, user_game: UserGame):
+        """Aggiorno attributi di user_game"""
+
+        cursor = self.connection.cursor()
+        cursor.execute("""
+            UPDATE user_games SET team = ?, initial_score = ?, earned_score = ?
+            WHERE game_id = ? AND user_id = ?
+            """,
+            (
+                user_game.team,
+                user_game.initial_score,
+                user_game.earned_score,
+                user_game.game_id,
+                user_game.user_id
+            ))
         self.connection.commit()
 
     def delete_game(self, game_id: int):
@@ -132,7 +163,10 @@ class SQLiteRepository(Repository):
                 user_games.team,
                 ur.points,
                 ur.last_results,
-                (SELECT COUNT(DISTINCT points) from user_ranks WHERE points > ur.points) +1
+                (SELECT COUNT(DISTINCT points) from user_ranks WHERE points > ur.points) +1,
+                user_games.initial_score,
+                user_games.earned_score,
+                user_games.created_at
             FROM user_games
             LEFT JOIN users ON (user_games.user_id = users.id)
             LEFT JOIN user_ranks ur ON (user_games.user_id = ur.user_id)
@@ -143,14 +177,16 @@ class SQLiteRepository(Repository):
 
         players_list = []
         for result in cursor.fetchall():
-            players_list.append(Player(
+            player = Player(
                 result[0],
                 result[1],
                 result[2],
                 result[3],
                 result[4],
                 result[5]
-            ))
+            )
+            user_game = UserGame(game_id, result[0], result[3], result[7], result[8], result[9])
+            players_list.append([player, user_game])
 
         return players_list
 
@@ -171,17 +207,6 @@ class SQLiteRepository(Repository):
                 INSERT INTO user_ranks (user_id, points, created_at, updated_at, last_results)
                 VALUES (?, ?, ?, ?, ?)
                 """, (user_id, points, time(), time(), last_results))
-        self.connection.commit()
-
-    def close_user_game(self, game_id: int, user_id: int, rank_score: int):
-        """Salva i punti vinti nel game"""
-
-        cursor = self.connection.cursor()
-        cursor.execute("""
-                UPDATE user_games SET rank_score = ? WHERE game_id = ? AND user_id = ?
-            """,
-            (rank_score, game_id, user_id)
-        )
         self.connection.commit()
 
     def get_match(self, match_id: int):

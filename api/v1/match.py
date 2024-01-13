@@ -52,7 +52,7 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
 
         _players = repo.get_players_by_game(match.game_id)
         for player in _players:
-            match.set_player(player, None)
+            match.set_player(player[0], None, player[1])
 
         final_scores = game_service.game_end(
             match,
@@ -75,7 +75,7 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
         results = []
         for match in last_matches:
             for player in repo.get_players_by_game(match.game_id):
-                match.set_player(player, None)
+                match.set_player(player[0], None, player[1])
             results.append(match)
 
         return jsonify({

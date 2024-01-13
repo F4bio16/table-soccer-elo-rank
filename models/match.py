@@ -1,5 +1,9 @@
 """Match model with helpers of calculate ELO rank"""
+import datetime
+
 from models.player import Player, Teams
+from models.player_score import PlayerScore
+
 from config.exceptions import EloException
 
 class Match:
@@ -7,6 +11,12 @@ class Match:
     state = None
     final_result = None
     expected_score = None
+
+    initial_users_score = None
+    delta_users_score = None
+
+    created_at = None
+    end_at = None
 
     def __init__(self, game_id: int, players: list[Player]):
         self.game_id = game_id
@@ -46,7 +56,7 @@ class Match:
 
         return match
 
-    def set_player(self, player: Player, team: Teams):
+    def set_player(self, player: Player, team: Teams, user_game):
         """set player"""
 
         _team = None
@@ -55,7 +65,12 @@ class Match:
         else:
             _team = team
 
-        self.opponents[_team]["players"].append(player)
+        if user_game is None:
+            self.opponents[_team]["players"].append(player)
+        else:
+            player_score = PlayerScore(player, user_game)
+            self.opponents[_team]["players"].append(player_score)
+
         self.opponents[_team]["team_points"] += player.rank_score
 
     def set_expected_score(self, team: Teams, expected_score):
@@ -75,6 +90,7 @@ class Match:
 
         self.opponents["winner_team"] = Teams.RED.value if score[0] > score[1] else Teams.BLUE.value
 
+        self.end_at = datetime.datetime.now()
         self.opponents[Teams.RED.value]["match_score"] = score[0]
         self.opponents[Teams.BLUE.value]["match_score"] = score[1]
 
