@@ -244,7 +244,7 @@
 
                 row += `<tr>
                         <td style="display: grid;"><span class='badge ${playerNameClass}'>${player.name}</span></td>
-                        <td style="text-align: right;">${player.initial_score !== -1 ? player.initial_score : 'n/a'} (${earnedScore})</td>
+                        <td style="text-align: right;">${player.initial_score !== -1 ? player.initial_score : 'n/a'} <b style="color: ${earnedScoreColor}">(${earnedScore})</b></td>
                       </tr>`
               }
 
@@ -260,7 +260,7 @@
 
               let row = `<tr class='match_row' data-match-id=${value['id']}><td class='center'>${value['id']}</td>`
 
-              row += '<td class="center"><table class="center" style="width: -moz-available;"><tbody>'
+              row += '<td class="center"><table class="center" style="width: 100%;"><tbody>'
               value.blue_players.forEach(drawPlayerRow.bind(this, 'blue'))
               row += '</tbody> </table> </td>'
 
@@ -270,7 +270,7 @@
                 row = row + "<td colspan='2' class='center'><button class='btn btn-warning btn-sm add_match_result'>Inserisci risultato</button></td>"
               }
 
-              row += '<td class="center"><table class="center" style="width: -moz-available;"><tbody>'
+              row += '<td class="center"><table class="center" style="width: 100%;"><tbody>'
               value.red_players.forEach(drawPlayerRow.bind(this, 'red'))
               row += '</tbody> </table> </td>'
 
