@@ -237,6 +237,16 @@
             $all_table = $('#all_matches')
             $all_table.html('')
             $.each(data['matches'], function( index, value ) {
+              function drawPlayerRow (team, player) {
+                const playerNameClass = team === 'blue' ? 'bg-primary' : 'bg-danger'
+                const earnedScore = player.earned_score === null ? '--' : player.earned_score > 0 ? `+ ${player.earned_score}` : player.earned_score
+                const earnedScoreColor = player.earned_score > 0 ? 'green' : 'red'
+
+                row += `<tr>
+                        <td style="display: grid;"><span class='badge ${playerNameClass}'>${player.name}</span></td>
+                        <td style="text-align: right;">${player.initial_score !== -1 ? player.initial_score : 'n/a'} <b style="color: ${earnedScoreColor}">(${earnedScore})</b></td>
+                      </tr>`
+              }
 
               let blue_score_colored = "<span class='badge bg-success'>"+value['blue_score']+"</span>"
               if(value['blue_score'] < value['red_score']){
@@ -248,15 +258,21 @@
                 red_score_colored = "<span class='badge bg-secondary'>"+value['red_score']+"</span>"
               }
 
-              let row = "<tr class='match_row' data-match-id="+value['id']+">\
-                <td class='center'>"+value['id']+"</td>\
-                <td class='center'><span class='badge bg-primary'>"+value['blue_players'][0]['name']+"</span><span class='badge bg-primary'>"+value['blue_players'][1]['name']+"</span></td>"
-                if(value['state'] == "__end__"){
-                  row = row + "<td style='text-align:right'>"+blue_score_colored+"</td><td style='text-align:left'>"+red_score_colored+"</td>"
-                }else{
-                  row = row + "<td colspan='2' class='center'><button class='btn btn-warning btn-sm add_match_result'>Inserisci risultato</button></td>"
-                }
-                row = row + "<td class='center'><span class='badge bg-danger'>"+value['red_players'][0]['name']+"</span><span class='badge bg-danger'>"+value['red_players'][1]['name']+"</span></td></tr>"
+              let row = `<tr class='match_row' data-match-id=${value['id']}><td class='center'>${value['id']}</td>`
+
+              row += '<td class="center"><table class="center" style="width: 100%;"><tbody>'
+              value.blue_players.forEach(drawPlayerRow.bind(this, 'blue'))
+              row += '</tbody> </table> </td>'
+
+              if(value['state'] == "__end__"){
+                row = row + "<td style='text-align:right'>"+blue_score_colored+"</td><td style='text-align:left'>"+red_score_colored+"</td>"
+              } else {
+                row = row + "<td colspan='2' class='center'><button class='btn btn-warning btn-sm add_match_result'>Inserisci risultato</button></td>"
+              }
+
+              row += '<td class="center"><table class="center" style="width: 100%;"><tbody>'
+              value.red_players.forEach(drawPlayerRow.bind(this, 'red'))
+              row += '</tbody> </table> </td>'
 
               $all_table.append(row)
             });

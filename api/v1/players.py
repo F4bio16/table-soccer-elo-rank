@@ -13,7 +13,7 @@ def players(webservice_name, repo: SQLiteRepository):
         query = request.args.get('query', "")
 
         return jsonify(
-            sorted([ player.toJSON() for player in repo.get_players(query) ],
+            sorted([ player.toJSON(show_last_results=True) for player in repo.get_players(query) ],
                 key=lambda player: player["score"], reverse=True))
 
     return player_bp
