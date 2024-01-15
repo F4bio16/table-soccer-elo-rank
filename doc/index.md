@@ -13,17 +13,28 @@
 | last_results | Array\<boolean\> | results of latest 5 match | 🗹 |
 | team | null | not used | 🗹 |
 
+### PlayerScore
+
+| name | type | description | nullable |
+|---|---|---|---|
+| id | number | player ID |
+| name | string | player name |
+| score | number | player rank score |
+| team | string | not used |
+| initial_score | number | user score before the match. -1 if not available |
+| earned_score | number | points earned in this match | 🗹 |
+
 ### Match
 
 
 | name | type | description | nullable |
 |---|---|---|---|
 | id | number | match ID |
-| blue_score | number | score of blue team |
-| red_score | number | score of red team |
+| blue_score | number | score of blue team | 🗹 |
+| red_score | number | score of red team | 🗹 |
 | state | string | state of the match.<br>Expected values:<br> `__initial__`: initial state <br> `__progress__`: match on progress <br>`__suspend__`: match suspended <br>  `__end__`: match ended | |
-| blue_players | Array\<Player\> | Players of blue team | |
-| red_players | Array\<Player\> | Players of red team | |
+| blue_players | Array\<PlayerScore\> | Players of blue team | |
+| red_players | Array\<PlayerScore\> | Players of red team | |
 
 
 ## Lista giocatori
@@ -116,29 +127,18 @@
     {
       "blue_players": [
         {
+          "earned_score": 16,
           "id": 28,
-          "last_results": [
-            false,
-            true,
-            true,
-            false,
-            true
-          ],
+          "initial_score": -1,
           "name": "Rosario Brischetto",
-          "rank_position": null,
-          "score": 1117,
+          "score": 1116,
           "team": "__blue__"
         },
         {
+          "earned_score": 16,
           "id": 3,
-          "last_results": [
-            true,
-            false,
-            true,
-            true
-          ],
+          "initial_score": -1,
           "name": "Andrea D'Ippolito",
-          "rank_position": null,
           "score": 1038,
           "team": "__blue__"
         }
@@ -147,30 +147,18 @@
       "id": 29,
       "red_players": [
         {
+          "earned_score": -3,
           "id": 11,
-          "last_results": [
-            true,
-            true,
-            true,
-            false,
-            false
-          ],
+          "initial_score": -1,
           "name": "Emiliano Pieri",
-          "rank_position": null,
-          "score": 1043,
+          "score": 1042,
           "team": "__red__"
         },
         {
+          "earned_score": -3,
           "id": 26,
-          "last_results": [
-            true,
-            false,
-            false,
-            true,
-            false
-          ],
+          "initial_score": -1,
           "name": "Riccardo Bellanova",
-          "rank_position": null,
           "score": 1084,
           "team": "__red__"
         }
@@ -240,10 +228,6 @@
 ### Body request
 
 **ContentType**: `application/json`
-
-
-" -d '{ "red_result": 11, "blue_result": 5 }' -H "Content-Type: application/json"
-`/api/v1/matches/complete`
 
 | name | type | description | mandatory |
 |---|---|---|---|

@@ -1,5 +1,6 @@
 """user service"""
 from models.game import GameState
+from models.user_game import UserGame
 from models.player import Player, Teams
 from models.match import Match
 
@@ -38,14 +39,18 @@ class GameService:
             self.repo.game_set_expected_scores(match)
 
             for player in players:
-                self.repo.create_usergame(game_id, player.id, player.team)
+                self.repo.create_usergame(UserGame.get_instance(match, player))
 
             return match
-        except EloException:
+        except EloException as e:
+            print(e)
             pass
-        except Exception:
+        except Exception as e:
+            print(e)
             if game_id is not None:
                 self.repo.delete_game(game_id)
+        finally:
+            print
 
         return None
 
@@ -86,13 +91,18 @@ class GameService:
             )
         )
 
-        for player in players:
+        for el in players:
+            player = el[0]
             player.add_result(winner == player.team)
 
             match_point = match.opponents[player.team]["match_points"]
 
+            user_game = UserGame.get_instance(match, player)
+            user_game.set_earned_score(match_point)
+
             player.add_rank_score(match_point)
+
             self.repo.update_user_rank(player.id, player.rank_score, player.last_results)
-            self.repo.close_user_game(match.game_id, player.id, match_point)
+            self.repo.update_user_game(user_game)
 
         return players

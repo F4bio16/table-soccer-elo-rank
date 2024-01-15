@@ -1,7 +1,5 @@
 """player model"""
 from enum import Enum
-import math
-
 from models.user import User
 
 class Teams(Enum):
@@ -45,13 +43,13 @@ class Player(User):
 
         return [ self.last_results & (1 << i) != 0 for i in range(max_results)][::-1]
 
-    def toJSON(self):
+    def toJSON(self, show_last_results=False):
         """serialize Player class"""
         return {
             "id": self.id,
             "name": " ".join(filter(None, [self.name, self.surname])),
             "team": self.team,
             "score": self.rank_score,
-            "last_results": self.get_last_results(5),
+            "last_results": None if show_last_results is False else self.get_last_results(5),
             "rank_position": self.rank_position
         }
