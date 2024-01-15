@@ -1,6 +1,5 @@
 # db files
 *.db
-*.sql
 
 #MacOS Files
 .DS_Store
