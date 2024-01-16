@@ -61,7 +61,7 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
 
         return jsonify({
             "player_scores": [
-                { **player.toJSON(), **{ "score_delta": match.get_match_points(player.team)}}
+                { **player[0].toJSON(), **{ "score_delta": match.get_match_points(player[0].team)}}
                 for player in final_scores]
         })
 
