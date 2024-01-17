@@ -18,6 +18,82 @@
         margin-left: auto;
         margin-right: auto;
       }
+
+      .red_team_goals{
+        background-color: rgb(220, 53, 69, .3);
+      }
+
+      .blue_team_goals{
+        background-color: rgb(13, 110, 253, .3)
+      }
+
+      .blue_team_goals input, .red_team_goals input{
+        width: 50%;
+        margin: 10px auto;
+      }
+
+      .under{
+        width: 140px;
+        margin: 20px auto 0;
+      }
+
+      .under input[type="checkbox"][id^="blue_under"] {
+        display: none;
+      }
+
+      .under input[type="checkbox"][id^="red_under"] {
+        display: none;
+      }
+
+      .under label {
+        padding: 10px;
+        display: block;
+        position: relative;
+        margin: 10px;
+        cursor: pointer;
+      }
+
+      .under label:before {
+        background-color: white;
+        color: white;
+        content: " ";
+        display: block;
+        border-radius: 5%;
+        border: 1px solid white;
+        position: absolute;
+        top: -15px;
+        left: 20px;
+        width: 25px;
+        height: 25px;
+        text-align: center;
+        line-height: 28px;
+        transition-duration: 0.4s;
+        transform: scale(0);
+      }
+
+      .under label img {
+        height: 100px;
+        width: 100px;
+        transition-duration: 0.2s;
+        transform-origin: 50% 50%;
+      }
+
+      .under :checked + label {
+        border-color: #ddd;
+      }
+
+      .under :checked + label:before {
+        content: "UMILIATI!";
+        background-color: red;
+        transform: scale(1);
+        width: 80px;
+      }
+
+      .under :checked + label img {
+        transform: scale(0.9);
+        /* box-shadow: 0 0 5px #333; */
+        z-index: -1;
+      }
     </style>
   </head>
 
@@ -61,31 +137,31 @@
             </div>
             <div class="modal-body">
               <form class="submit_result" class="ps-5 pb-5">
-                <div class="row g-3 align-items-center">
-                  <div class="col-auto">
-                    <label for="blue_goals" class="col-form-label">Blu</label>
+                <div class="row">
+                  <div class="col-6 text-center p-2 blue_team_goals">
+                    <span class="blue_team">Squadra Blu</span><br>
+                    <div class="blue_players_html"></div>
+                    <input type="number" class="blue_goals form-control">
+                    <div class="under">
+                      <input type="checkbox" id="blue_under" />
+                      <label for="blue_under"><img src="static/images/biliardino.jpg" /></label>
+                    </div>
                   </div>
-                  <div class="col-auto">
-                    <input type="number" class="blue_goals" class="form-control" aria-describedby="blueGoals">
+                  <div class="col-6 text-center p-2 red_team_goals">
+                    <span class="red_team">Squadra Rossa</span><br>
+                    <div class="red_players_html"></div>
+                    <input type="number" class="red_goals form-control">
+                    <div class="under">
+                      <input type="checkbox" id="red_under" />
+                      <label for="red_under"><img src="static/images/biliardino.jpg" /></label>
+                    </div>
                   </div>
-                  <div class="col-auto">
-                    <span class="form-text">
-                      -
-                    </span>
-                  </div>
-                  <div class="col-auto">
-                    <input type="number" class="red_goals" class="form-control" aria-describedby="redGoals">
-                  </div>
-                  <div class="col-auto">
-                    <label for="red_goals" class="col-form-label">Rossi</label>
+                  <div class="col-12 text-center">
+                    <br>
+                    <button class="btn btn-secondary submit_result">Inserisci risultato</button> 
                   </div>
                 </div>
-                <br>
-                <button class="btn btn-secondary submit_result">Inserisci risultato</button>
               </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
           </div>
         </div>
@@ -181,6 +257,8 @@
             data: JSON.stringify({
               "red_result": parseInt($($parent_form).find('.red_goals').val()),
               "blue_result": parseInt($($parent_form).find('.blue_goals').val()),
+              "blue_under": $('#blue_under').is(':checked'),
+              "red_under": $('#red_under').is(':checked')
             }),
             success: function(data) {
               if(resultModal){
@@ -216,9 +294,23 @@
         let resultModal = false
         $( "body" ).on( "click", "button.add_match_result", function(e) {
           e.preventDefault()
+          let tr = $(this).parents('tr')
+          let blue_players = $(tr).find('.bg-primary')
+          let red_players = $(tr).find('.bg-danger')
+          let blue_players_html = ''
+          let red_players_html = ''
+          $.each(blue_players, function(index, player){
+            blue_players_html += "<span class='badge bg-primary p"+index+1+"'>"+$(player).html()+"</span><br>";
+          })
+          $.each(red_players, function(index, player){
+            red_players_html += "<span class='badge bg-danger p"+index+1+"'>"+$(player).html()+"</span><br>";
+          })
+          $('.blue_players_html').html(blue_players_html)
+          $('.red_players_html').html(red_players_html)
           let match_id = parseInt($(this).parent().parent().attr('data-match-id'))
           $('.match_id').text(match_id)
           resultModal = new bootstrap.Modal(document.getElementById("add_result"), {});
+          $(resultModal).find('blue_team').append(blue_players)
           resultModal.show();
         })
 
@@ -242,10 +334,12 @@
                 const earnedScore = player.earned_score === null ? '--' : player.earned_score > 0 ? `+ ${player.earned_score}` : player.earned_score
                 const earnedScoreColor = player.earned_score > 0 ? 'green' : 'red'
 
-                row += `<tr>
-                        <td style="display: grid;"><span class='badge ${playerNameClass}'>${player.name}</span></td>
-                        <td style="text-align: right;">${player.initial_score !== -1 ? player.initial_score : 'n/a'} <b style="color: ${earnedScoreColor}">(${earnedScore})</b></td>
-                      </tr>`
+                row += `<div class="row p-1">
+                          <span class='col-12 col-lg-6 badge ${playerNameClass}'>${player.name}</span>
+                          <span class="col-12 col-lg-6">
+                            ${player.initial_score !== -1 ? player.initial_score : 'n/a'} <b style="color: ${earnedScoreColor}">(${earnedScore})</b>
+                          </span>
+                        </div>`
               }
 
               let blue_score_colored = "<span class='badge bg-success'>"+value['blue_score']+"</span>"
