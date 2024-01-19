@@ -289,6 +289,8 @@
 
       let red_team = [0,0]
       let blue_team = [0,0]
+      let red_players_current = [0,0]
+      let blue_players_current = [0,0]
 
       let all_players = []
       
@@ -323,6 +325,7 @@
                         const selection = event.detail.selection.value;
                         autoCompleteJSB1.input.value = selection;
                         blue_team[0] = parseInt(selection.split(' - ')[0])
+                        blue_players_current[0] = parseInt(selection.split(' - ')[1])
                     }
                 }
             }
@@ -344,6 +347,7 @@
                         const selection = event.detail.selection.value;
                         autoCompleteJSB2.input.value = selection;
                         blue_team[1] = parseInt(selection.split(' - ')[0])
+                        blue_players_current[1] = parseInt(selection.split(' - ')[1])
                     }
                 }
             }
@@ -365,6 +369,7 @@
                         const selection = event.detail.selection.value;
                         autoCompleteJSR1.input.value = selection;
                         red_team[0] = parseInt(selection.split(' - ')[0])
+                        red_players_current[0] = parseInt(selection.split(' - ')[1])
                     }
                 }
             }
@@ -386,6 +391,7 @@
                         const selection = event.detail.selection.value;
                         autoCompleteJSR2.input.value = selection;
                         red_team[1] = parseInt(selection.split(' - ')[0])
+                        red_players_current[1] = parseInt(selection.split(' - ')[1])
                     }
                 }
             }
@@ -434,6 +440,16 @@
                 'aria-valuenow': red_perc,
               });
               $('#match_expectations .bg-danger').text(red_perc + "%")
+              let blue_players_html = ''
+              let red_players_html = ''
+              $.each(blue_players_current, function(index, player){
+                blue_players_html += "<span class='badge bg-primary p"+index+1+"'>"+$(player)+"</span><br>";
+              })
+              $.each(red_players, function(index, player){
+                red_players_html += "<span class='badge bg-danger p"+index+1+"'>"+$(player)+"</span><br>";
+              })
+              $('.blue_players_html').html(blue_players_html)
+              $('.red_players_html').html(red_players_html)
             },
             error: function(error){
               let alert_content = '<div class="error_response_alert alert alert-danger alert-dismissible fade show" role="alert">\
