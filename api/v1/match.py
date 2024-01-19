@@ -54,9 +54,21 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
         for player in _players:
             match.set_player(player[0], None, player[1])
 
+        team_red_score = data.get('red_result')
+        team_blue_score = data.get('blue_result')
+
+        team_red_humiliated = data.get('red_humiliated') is True
+        team_blue_humiliated = data.get('blue_humiliated') is True
+
+        if team_red_score == team_blue_score:
+            return 'A draw is not allowed', 400
+
         final_scores = game_service.game_end(
             match,
-            data.get("red_result"), data.get("blue_result")
+            team_red_score,
+            team_blue_score,
+            team_red_humiliated,
+            team_blue_humiliated
         )
 
         return jsonify({
