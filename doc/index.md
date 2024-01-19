@@ -232,13 +232,17 @@
 | name | type | description | mandatory |
 |---|---|---|---|
 | red_result | number | score result of red team | 🗹 |
+| red_humiliated | boolean | true if red team was humiliated. *Default: false* | |
 | blue_result | number | score result of red team | 🗹 |
+| blue_humiliated | boolean | true if blue team was humiliated. *Default: false* | |
 
 *Example:*
 ```json
 {
   "red_result": 11,
-  "blue_result": 5
+  "red_humiliated": false,
+  "blue_result": 5,
+  "blue_humiliated": false,
 }
 ```
 

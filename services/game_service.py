@@ -54,7 +54,13 @@ class GameService:
 
         return None
 
-    def game_end(self, match: Match, team_red_score: int, team_blue_score: int):
+    def game_end(
+        self,
+        match: Match,
+        team_red_score: int,
+        team_blue_score: int,
+        team_red_humiliated: bool = False,
+        team_blue_humiliated: bool = False):
         """
             termina il game:
             - aggiorniamo lo stato sul DB

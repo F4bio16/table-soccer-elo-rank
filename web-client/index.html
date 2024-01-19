@@ -160,6 +160,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
+            <div class="alert_container"></div>
             <form id="add_form" class="submit_result" class="ps-5 pb-5">
               <div class="row">
                 <div class="col-6 text-center p-2 blue_team_goals">
@@ -289,6 +290,8 @@
 
       let red_team = [0,0]
       let blue_team = [0,0]
+      let red_players_current = [0,0]
+      let blue_players_current = [0,0]
 
       let all_players = []
       
@@ -323,6 +326,7 @@
                         const selection = event.detail.selection.value;
                         autoCompleteJSB1.input.value = selection;
                         blue_team[0] = parseInt(selection.split(' - ')[0])
+                        blue_players_current[0] = selection.split(' - ')[1]
                     }
                 }
             }
@@ -344,6 +348,7 @@
                         const selection = event.detail.selection.value;
                         autoCompleteJSB2.input.value = selection;
                         blue_team[1] = parseInt(selection.split(' - ')[0])
+                        blue_players_current[1] = selection.split(' - ')[1]
                     }
                 }
             }
@@ -365,6 +370,7 @@
                         const selection = event.detail.selection.value;
                         autoCompleteJSR1.input.value = selection;
                         red_team[0] = parseInt(selection.split(' - ')[0])
+                        red_players_current[0] = selection.split(' - ')[1]
                     }
                 }
             }
@@ -386,6 +392,7 @@
                         const selection = event.detail.selection.value;
                         autoCompleteJSR2.input.value = selection;
                         red_team[1] = parseInt(selection.split(' - ')[0])
+                        red_players_current[1] = selection.split(' - ')[1]
                     }
                 }
             }
@@ -434,6 +441,16 @@
                 'aria-valuenow': red_perc,
               });
               $('#match_expectations .bg-danger').text(red_perc + "%")
+              let blue_players_html = ''
+              let red_players_html = ''
+              $.each(blue_players_current, function(index, player){
+                blue_players_html += "<span class='badge bg-primary p"+index+1+"'>"+player+"</span><br>";
+              })
+              $.each(red_players_current, function(index, player){
+                red_players_html += "<span class='badge bg-danger p"+index+1+"'>"+player+"</span><br>";
+              })
+              $('.blue_players_html').html(blue_players_html)
+              $('.red_players_html').html(red_players_html)
             },
             error: function(error){
               let alert_content = '<div class="error_response_alert alert alert-danger alert-dismissible fade show" role="alert">\
@@ -448,43 +465,54 @@
         $( "body" ).on( "click", "button.submit_result", function(e) {
           e.preventDefault()
           $parent_form =  $(this).closest('form')[0]
-          $.ajax({
-            type: "POST",
-            contentType: "application/json",
-            url: endpoint + "/matches/"+$('.match_id').first().text() +"/complete",
-            data: JSON.stringify({
-              "red_result": parseInt($($parent_form).find('.red_goals').val()), 
-              "blue_result": parseInt($($parent_form).find('.blue_goals').val()),
-              "blue_under": $($parent_form).attr('id') == "add_form" ? $('#blue_under_add').is(':checked') : $('#blue_under').is(':checked'),
-              "red_under": $($parent_form).attr('id') == "add_form" ? $('#red_under_add').is(':checked') : $('#red_under').is(':checked'),
-            }),
-            success: function(data) {
-              if(resultModal){
-                resultModal.hide();
+          let red_goals_val = $($parent_form).find('.red_goals').val()
+          let blue_goals_val = $($parent_form).find('.blue_goals').val()
+          if(blue_goals_val && red_goals_val){
+            $.ajax({
+              type: "POST",
+              contentType: "application/json",
+              url: endpoint + "/matches/"+$('.match_id').first().text() +"/complete",
+              data: JSON.stringify({
+                "red_result": parseInt(red_goals_val), 
+                "blue_result": parseInt(blue_goals_val),
+                "blue_under": $($parent_form).attr('id') == "add_form" ? $('#blue_under_add').is(':checked') : $('#blue_under').is(':checked'),
+                "red_under": $($parent_form).attr('id') == "add_form" ? $('#red_under_add').is(':checked') : $('#red_under').is(':checked'),
+              }),
+              success: function(data) {
+                if(resultModal){
+                  resultModal.hide();
+                }
+                $('.red_goals').val('')
+                $('.blue_goals').val('')
+                $('#my-autocomplete-container1 input').val('')
+                $('#my-autocomplete-container2 input').val('')
+                $('#my-autocomplete-container3 input').val('')
+                $('#my-autocomplete-container4 input').val('')
+                $('#new_match').show()
+                $('#match_odds').hide()
+                let modal_content = $('#rankings .modal-body')
+                $(modal_content).html('')
+                let result_text = '<ul class="list-group">';
+                let players_scores_sorted = data['player_scores'].sort(sortByRank).reverse();
+                $.each(players_scores_sorted, function( index, value ) {
+                  let team_color = value["team"] == "__red__" ? "bg-danger" : "bg-primary"
+                  result_text = result_text + "<li class='list-group-item text-white "+team_color+"'><b>"+value['name']+"</b>: "+value['score']+" ("+value['score_delta']+")</li>"
+                });
+                result_text = result_text + '</ul>';
+                $(modal_content).append(result_text)
+                let myModal = new bootstrap.Modal(document.getElementById("rankings"), {});
+                myModal.show();
+                updateLatest();
+                $('.alert_container').html('')
               }
-              $('.red_goals').val('')
-              $('.blue_goals').val('')
-              $('#my-autocomplete-container1 input').val('')
-              $('#my-autocomplete-container2 input').val('')
-              $('#my-autocomplete-container3 input').val('')
-              $('#my-autocomplete-container4 input').val('')
-              $('#new_match').show()
-              $('#match_odds').hide()
-              let modal_content = $('#rankings .modal-body')
-              $(modal_content).html('')
-              let result_text = '<ul class="list-group">';
-              let players_scores_sorted = data['player_scores'].sort(sortByRank).reverse();
-              $.each(players_scores_sorted, function( index, value ) {
-                let team_color = value["team"] == "__red__" ? "bg-danger" : "bg-primary"
-                result_text = result_text + "<li class='list-group-item text-white "+team_color+"'><b>"+value['name']+"</b>: "+value['score']+" ("+value['score_delta']+")</li>"
-              });
-              result_text = result_text + '</ul>';
-              $(modal_content).append(result_text)
-              let myModal = new bootstrap.Modal(document.getElementById("rankings"), {});
-              myModal.show();
-              updateLatest();
-            }
-          });
+            });
+          }else{
+            let alert_content = '<div class="error_response_alert alert alert-danger alert-dismissible fade show" role="alert">\
+                                    <strong class="error_response">Punteggio non valido</strong>\
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>\
+                                  </div>'
+            $('.alert_container').html(alert_content)
+          } 
         });
 
         updateLatest();
@@ -493,18 +521,20 @@
         $( "body" ).on( "click", "button.add_match_result", function(e) {
           e.preventDefault()
           let tr = $(this).parents('tr')
-          let blue_players = $(tr).find('.bg-primary')
-          let red_players = $(tr).find('.bg-danger')
-          let blue_players_html = ''
-          let red_players_html = ''
-          $.each(blue_players, function(index, player){
-            blue_players_html += "<span class='badge bg-primary p"+index+1+"'>"+$(player).html()+"</span><br>";
-          })
-          $.each(red_players, function(index, player){
-            red_players_html += "<span class='badge bg-danger p"+index+1+"'>"+$(player).html()+"</span><br>";
-          })
-          $('.blue_players_html').html(blue_players_html)
-          $('.red_players_html').html(red_players_html)
+          if($(tr).length > 0){
+            let blue_players = $(tr).find('.bg-primary')
+            let red_players = $(tr).find('.bg-danger')
+            let blue_players_html = ''
+            let red_players_html = ''
+            $.each(blue_players, function(index, player){
+              blue_players_html += "<span class='badge bg-primary p"+index+1+"'>"+$(player).html()+"</span><br>";
+            })
+            $.each(red_players, function(index, player){
+              red_players_html += "<span class='badge bg-danger p"+index+1+"'>"+$(player).html()+"</span><br>";
+            })
+            $('.blue_players_html').html(blue_players_html)
+            $('.red_players_html').html(red_players_html)
+          }
           let match_id = parseInt($(this).parent().parent().attr('data-match-id'))
           $('.match_id').text(match_id)
           resultModal = new bootstrap.Modal(document.getElementById("add_result"), {});
