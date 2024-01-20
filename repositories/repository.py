@@ -33,7 +33,8 @@ class Repository(ABC):
         """method for delete game by game_id"""
 
     @abstractmethod
-    def update_game(self, game_id: int, state, final_result):
+    def update_game(self, game_id: int, state, final_result,
+        red_humiliated: bool, blue_humiliated: bool):
         """method for update game record"""
 
     @abstractmethod

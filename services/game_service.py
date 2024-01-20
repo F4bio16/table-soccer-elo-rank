@@ -75,7 +75,9 @@ class GameService:
         self.repo.update_game(
             match.game_id,
             GameState.END.value,
-            f"{team_red_score}:{team_blue_score}"
+            f"{team_red_score}:{team_blue_score}",
+            team_red_humiliated,
+            team_blue_humiliated
         )
 
         match.finish((team_red_score, team_blue_score))

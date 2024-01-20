@@ -81,10 +81,20 @@ class SQLiteRepository(Repository):
         cursor.execute("DELETE FROM games WHERE id = ?", (game_id,))
         self.connection.commit()
 
-    def update_game(self, game_id: int, state, final_result):
+    def update_game(self, game_id: int, state, final_result,
+        red_humiliated: bool, blue_humiliated: bool):
         cursor = self.connection.cursor()
-        cursor.execute("UPDATE games SET state = ?, final_result = ? WHERE id = ?",
-            (state, final_result, game_id))
+        cursor.execute("""
+            UPDATE games
+            SET
+                state = ?,
+                final_result = ?,
+                end_at = ?,
+                args = json_set(args, '$.red_humiliated', ?, '$.blue_humiliated', ?)
+            WHERE id = ?
+        """,
+        (state, final_result, time(), red_humiliated, blue_humiliated, game_id))
+
         self.connection.commit()
 
     def game_set_expected_scores(self, match: Match):
