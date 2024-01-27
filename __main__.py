@@ -6,14 +6,20 @@ from services.game_service import GameService
 from services.rank_service import RankService
 from services.http_web_service import HttpWebService
 from repositories.sqlite_repo import SQLiteRepository
-# from models.player import Teams
 
 print("Initializing application ELO Rating System")
 
 # loading environment variables
 load_dotenv()
 
-rank_service = RankService(int(os.getenv("ELO_MULTIPLIER_FACTOR")))
+rank_service = RankService(
+  int(os.getenv("ELO_MULTIPLIER_FACTOR")),
+  {
+    'bonus': int(os.getenv("ELO_HUMILIATION_BONUS")),
+    'malus': int(os.getenv("ELO_HUMILIATION_MALUS"))
+  }
+)
+
 repo = SQLiteRepository({"DB_NAME": os.getenv("DB_NAME")})
 repo.connect()
 
