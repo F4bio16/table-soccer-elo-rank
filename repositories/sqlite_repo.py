@@ -261,3 +261,37 @@ class SQLiteRepository(Repository):
                     result[3]
                 ))
         return matches
+
+    def get_match_by_player(self, user_id: int):
+        """Get match by ID"""
+
+        cursor = self.connection.cursor()
+        cursor.execute("""
+            SELECT games.id, games.state, games.final_result, games.expected_scores,
+                user_games.team, user_games.initial_score, user_games.earned_score,
+                user_games.created_at
+            FROM games
+            LEFT JOIN user_games ON (user_games.game_id = games.id)
+            WHERE user_games.user_id = ?
+            ORDER BY user_games.created_at DESC
+            """,
+            (user_id,))
+
+        matches = []
+        for result in cursor.fetchall():
+            curr_match = Match.get_instance(
+                result[0],
+                result[1],
+                result[2],
+                result[3]
+            )
+            curr_match.player_details = dict(
+                team=result[4],
+                initial_score=result[5],
+                earned_score=result[6],
+                date=result[7]
+            )
+
+            matches.append(curr_match)
+
+        return matches

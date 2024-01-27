@@ -60,3 +60,7 @@ class Repository(ABC):
     @abstractmethod
     def get_last_matches(self, limit: int):
         """return list of recent match"""
+
+    @abstractmethod
+    def get_match_by_player(self, user_id: int):
+        """return played match of a player"""
