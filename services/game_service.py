@@ -75,7 +75,9 @@ class GameService:
         self.repo.update_game(
             match.game_id,
             GameState.END.value,
-            f"{team_red_score}:{team_blue_score}"
+            f"{team_red_score}:{team_blue_score}",
+            team_red_humiliated,
+            team_blue_humiliated
         )
 
         match.finish((team_red_score, team_blue_score))
@@ -86,13 +88,15 @@ class GameService:
                     self.rank_service.get_match_score(
                         team_red_score, match.get_winner_opponent()["match_score"]
                     ),
-                    match.get_expected_score(Teams.RED.value)
+                    match.get_expected_score(Teams.RED.value),
+                    dict(humiliated = team_red_humiliated, humiliating = team_blue_humiliated)
                 ),
                 self.rank_service.calculate_ranking_points(
                     self.rank_service.get_match_score(
                         team_blue_score, match.get_winner_opponent()["match_score"]
                     ),
-                    match.get_expected_score(Teams.BLUE.value)
+                    match.get_expected_score(Teams.BLUE.value),
+                    dict(humiliated = team_blue_humiliated, humiliating = team_red_humiliated)
                 )
             )
         )

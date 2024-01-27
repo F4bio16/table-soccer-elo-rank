@@ -261,8 +261,8 @@
               data: JSON.stringify({
                 "red_result": parseInt(red_goals_val),
                 "blue_result": parseInt(blue_goals_val),
-                "blue_under": $('#blue_under').is(':checked'),
-                "red_under": $('#red_under').is(':checked')
+                "blue_humiliated": $('#blue_under').is(':checked'),
+                "red_humiliated": $('#red_under').is(':checked')
               }),
               success: function(data) {
                 if(resultModal){

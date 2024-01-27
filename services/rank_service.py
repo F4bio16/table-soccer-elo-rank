@@ -2,8 +2,13 @@
 
 class RankService:
     """RankService class"""
-    def __init__(self, multiplicator_factor):
+    def __init__(self, multiplicator_factor,
+        humiliation_strategy: dict = None):
         self.multiplicator_factor = multiplicator_factor
+        self.humiliation_strategy = {
+            'bonus': humiliation_strategy.get('bonus', 2),
+            'malus': humiliation_strategy.get('malus', -3)
+        }
 
     def calculate_expected_score(self, ranking1, ranking2):
         """
@@ -27,10 +32,20 @@ class RankService:
 
         return (score / winner_score) * 0.6
 
-    def calculate_ranking_points(self, match_score, expected_score):
+    def calculate_ranking_points(self, match_score, expected_score, kwargs: dict):
         """
           Metodo per calcolare i punti da aggiungere ad un singolo giocatore
           dopo la fine di una partita
         """
 
-        return int((match_score - expected_score) * self.multiplicator_factor)
+        humiliated = kwargs.get('humiliated', False)
+        humiliating = kwargs.get('humiliating', False)
+
+        result = int((match_score - expected_score) * self.multiplicator_factor)
+        if humiliated is True:
+            result += self.humiliation_strategy.get('malus')
+
+        if humiliating is True:
+            result += self.humiliation_strategy.get('bonus')
+
+        return result
