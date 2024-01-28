@@ -52,7 +52,7 @@
 
             <div class="row">
               <div class="col-4">Partite totali</div>
-              <div class="col-8">{{ player.match_count }}</div>
+              <div class="col-8" id="player_match_count">--</div>
             </div>
 
             <div class="row">
@@ -92,9 +92,11 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
       const endpoint = window.location.origin + "/api/v1"
-
       fetch(`${endpoint}/players/{{player.id}}`)
         .then(data => data.json())
+        .then(data => {
+          document.getElementById('player_match_count').innerHTML = data.match_count
+        })
         .then(data => {
           document.getElementById('all_matches').innerHTML = data.matches
             .map(match => {
