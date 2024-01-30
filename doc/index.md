@@ -53,53 +53,55 @@
 
 | name | type | description | mandatory |
 |---|---|---|---|
-| | Array\<Player\> | list of players | 🗹 |
+| players | Array\<Player\> | list of players | 🗹 |
 
 *Example:*
 ```json
-[
-  {
-    "id": 13,
-    "last_results": [
-      true,
-      false,
-      true,
-      true,
-      true
-    ],
-    "name": "Fabio Folchi",
-    "rank_position": 1,
-    "score": 1135,
-    "team": null
-  },
-  {
-    "id": 3,
-    "last_results": [
-      true,
-      false,
-      true,
-      true
-    ],
-    "name": "Andrea D'Ippolito",
-    "rank_position": 2,
-    "score": 1095,
-    "team": null
-  }
-  {
-    "id": 26,
-    "last_results": [
-      true,
-      false,
-      false,
-      true,
-      false
-    ],
-    "name": "Riccardo Bellanova",
-    "rank_position": 3,
-    "score": 1084,
-    "team": null
-  }
-]
+{
+  "players": [
+    {
+      "id": 13,
+      "last_results": [
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "name": "Fabio Folchi",
+      "rank_position": 1,
+      "score": 1135,
+      "team": null
+    },
+    {
+      "id": 3,
+      "last_results": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "name": "Andrea D'Ippolito",
+      "rank_position": 2,
+      "score": 1095,
+      "team": null
+    }
+    {
+      "id": 26,
+      "last_results": [
+        true,
+        false,
+        false,
+        true,
+        false
+      ],
+      "name": "Riccardo Bellanova",
+      "rank_position": 3,
+      "score": 1084,
+      "team": null
+    }
+  ]
+}
 ```
 
 ## Lista partite
