@@ -18,7 +18,9 @@ class HttpWebService:
         self.server.register_blueprint(
             v1_route.init(WEBSERVICE_NAME, self.sqlite_repository, self.game_service)
         )
-        self.server.register_blueprint(webclient_route.init(WEBSERVICE_NAME))
+        self.server.register_blueprint(
+            webclient_route.init(WEBSERVICE_NAME, self.sqlite_repository)
+        )
 
     def start(self, listening_port):
         """staring WebServer to listening_port"""

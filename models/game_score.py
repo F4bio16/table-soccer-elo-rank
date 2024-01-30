@@ -6,7 +6,8 @@ from models.player import Player
 class _GameScore(BaseModel):
     """GameScore Class"""
 
-    def __init__(self, game_id: int, user_id: int, initial_score: int, earned_score: int, created_at: str):
+    def __init__(self, game_id: int, user_id: int,
+        initial_score: int, earned_score: int, created_at: str):
         super().__init__('game_score')
 
         self.game_id = game_id
