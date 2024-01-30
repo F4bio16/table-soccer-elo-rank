@@ -301,7 +301,7 @@
           url: endpoint + "/players/",
           contentType: "application/json",
           success: function(data) {
-            $.each(data, function( index, value ) {
+            $.each(data.players, function( index, value ) {
               all_players.push(value['id'] + ' - '+value['name'])
             })
           }
