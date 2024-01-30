@@ -108,7 +108,7 @@
                 })
                 latest = latest + "</div>";
                 rank_position = value['rank_position'] == null ? '-' : value['rank_position']
-                let row = "<tr>\
+                let row = "<tr class='player_row' player_id='"+value['id']+"'>\
                   <td class='id'>"+ value['id']+"</td>\
                   <td class='ranking'><span class='badge bg-secondary'>"+ rank_position +"</span></td>\
                   <td class='name'>"+value['name']+"</td>\
@@ -118,10 +118,15 @@
                 $('#players_list').append(row)
               }
             });
+
+            for(const playerRow of window.document.getElementsByClassName('player_row')) {
+              playerRow.addEventListener('click', function () {
+                window.open(`/players/${playerRow.getAttribute('player_id')}`, '_self')
+              })
+            }
           }
         });
       })
-
     </script>
   </body>
 </html>

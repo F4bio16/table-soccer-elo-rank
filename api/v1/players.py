@@ -17,7 +17,7 @@ def players(webservice_name, repo: SQLiteRepository):
                 key=lambda player: player["score"], reverse=True)
         return jsonify(players=players_response)
 
-    @player_bp.route("/<player_id>/", methods=['GET'])
+    @player_bp.route("/<player_id>", methods=['GET'])
     def get_player(player_id):
         """player details"""
         player = repo.get_player(player_id, None)

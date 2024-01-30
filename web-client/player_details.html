@@ -96,6 +96,7 @@
         .then(data => data.json())
         .then(data => {
           document.getElementById('player_match_count').innerHTML = data.match_count
+          return data
         })
         .then(data => {
           document.getElementById('all_matches').innerHTML = data.matches
@@ -109,6 +110,7 @@
                 <td>${match.player_details.initial_score} <b style="color: ${earnedScoreColor}">(${earnedScore})</b></td>
                 <td>${match.player_details.date}</td>`
             }).join('');
+            return data
         })
         .then(data => {
           const arrDataTable = []
@@ -142,6 +144,7 @@
           google.charts.load('current', {packages: ['corechart', 'bar']});
           google.charts.setOnLoadCallback(drawMultSeries.bind(this, arrDataTable));
 
+	  return data
         })
       function drawMultSeries(arrDataTable) {
         const data = new google.visualization.arrayToDataTable([
