@@ -12,8 +12,9 @@ def players(webservice_name, repo: SQLiteRepository):
         """list of users"""
         query = request.args.get('query', "")
 
-        return jsonify(
-            sorted([ player.toJSON(show_last_results=True) for player in repo.get_players(query) ],
-                key=lambda player: player["score"], reverse=True))
+        players_response = sorted([ player.toJSON(show_last_results=True)
+            for player in repo.get_players(query) ],
+                key=lambda player: player["score"], reverse=True)
+        return jsonify(players=players_response)
 
     return player_bp
