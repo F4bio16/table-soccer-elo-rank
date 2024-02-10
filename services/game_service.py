@@ -54,6 +54,28 @@ class GameService:
 
         return None
 
+    def delete_game(self, game_id: int):
+        """
+            Elimina una partita solo se:
+                - è in stato "iniziale"
+                - è l'ultima partita completata - ricalcolo i punteggi dei partecipanti
+            negli altri casi restituisco errore
+        """
+        match = self.repo.get_match(game_id)
+
+        if match.state == GameState.INITIAL.value:
+            self.repo.update_game_state(game_id, GameState.DELETED)
+            return True
+        else:
+            last_match = self.repo.get_last_match_by_state(GameState.END)
+            if last_match.game_id != match.game_id:
+                return False
+
+            # TODO: reload point of users of the match
+            return False # True
+
+        return False
+
     def game_end(
         self,
         match: Match,

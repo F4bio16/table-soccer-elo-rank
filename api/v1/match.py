@@ -103,4 +103,18 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
             } for result in results]
         })
 
+
+    @match_bp.route('/<match_id>', methods=['DELETE'])
+    def delete_match(match_id):
+        """Delete match"""
+
+        match = repo.get_match(match_id)
+        if match is None:
+            return 'invalid match id', 400
+
+        result = game_service.delete_game(match_id)
+        if result is True:
+            return 'OK', 200
+
+        return "Unable to delete match", 400
     return match_bp
