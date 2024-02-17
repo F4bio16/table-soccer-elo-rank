@@ -66,15 +66,27 @@ class GameService:
         if match.state == GameState.INITIAL.value:
             self.repo.update_game_state(game_id, GameState.DELETED)
             return True
-        else:
-            last_match = self.repo.get_last_match_by_state(GameState.END)
-            if last_match.game_id != match.game_id:
-                return False
 
-            # TODO: reload point of users of the match
-            return False # True
+        last_match = self.repo.get_last_match_by_state(GameState.END)
+        if last_match.game_id != match.game_id:
+            return False
 
-        return False
+        results = self.repo.get_players_by_game(match.game_id)
+        for result in results:
+            player = result[0]
+            user_game = result[1]
+
+            # reload point for users of the match
+            self.repo.update_user_rank(
+                player.id,
+                user_game.initial_score,
+                # remove last result data
+                player.last_results >> 1
+            )
+
+        # change game status
+        self.repo.update_game_state(game_id, GameState.DELETED)
+        return True
 
     def game_end(
         self,
