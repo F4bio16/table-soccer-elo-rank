@@ -251,7 +251,9 @@ class SQLiteRepository(Repository):
 
         cursor = self.connection.cursor()
         cursor.execute("""
-            SELECT games.id, games.state, games.final_result, games.expected_scores
+            SELECT
+                games.id, games.state, games.final_result,
+                games.expected_scores, games.created_at, games.end_at, games.args
             FROM games
             ORDER BY id DESC
             LIMIT ?
@@ -261,13 +263,16 @@ class SQLiteRepository(Repository):
 
         matches = []
         for result in cursor.fetchall():
-            matches.append(
-                Match.get_instance(
-                    result[0],
-                    result[1],
-                    result[2],
-                    result[3]
-                ))
+            curr_match = Match.get_instance(
+                result[0],
+                result[1],
+                result[2],
+                result[3]
+            )
+            curr_match.set_durations(result[4], result[5])
+            curr_match.set_args(result[6])
+
+            matches.append(curr_match)
         return matches
 
     def get_match_by_player(self, user_id: int):
