@@ -8,6 +8,7 @@ class GameState(Enum):
     PROGRESS = '__progress__'
     SUSPEND = '__suspend__'
     END = '__end__'
+    DELETED = '__deleted__'
 
 class Game(BaseModel):
     """Game Class"""
