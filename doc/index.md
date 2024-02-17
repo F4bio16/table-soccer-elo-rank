@@ -32,10 +32,21 @@
 | id | number | match ID |
 | blue_score | number | score of blue team | 🗹 |
 | red_score | number | score of red team | 🗹 |
-| state | string | state of the match.<br>Expected values:<br> `__initial__`: initial state <br> `__progress__`: match on progress <br>`__suspend__`: match suspended <br>  `__end__`: match ended | |
+| state | string | state of the match.<br>Expected values:<br> `__initial__`: initial state <br> `__progress__`: match on progress <br>`__suspend__`: match suspended <br>  `__end__`: match ended <br> `__deleted__`: match deleted | |
 | blue_players | Array\<PlayerScore\> | Players of blue team | |
 | red_players | Array\<PlayerScore\> | Players of red team | |
+| start_dt | string | Date rapresentation in ISO string of start of game | |
+| end_dt | string | Date rapresentation in ISO string of end of game | 🗹 |
+| match_duration | number | duration of the game in seconds | 🗹 |
+| args | MatchAttributes | attributes of the game | 🗹 |
 
+### MatchAttributes
+
+
+| name | type | description | values |
+|---|---|---|---|
+| blue_humiliated | number | humiliation for blue team | `1` => `true`<br> `0` => `false`
+| red_humiliated | number | humiliation for red team | `1` => `true`<br> `0` => `false`
 
 ## Lista giocatori
 
@@ -322,3 +333,37 @@
 }
 
 ```
+
+
+## Cancella partita
+
+This API call is used to delete a game. A game can be deleted under the following conditions:
+
+- If the game is in the "initial" state.
+- If the game is the last game in the "end" state.
+
+**Method**: `DELETE`
+
+**Endpoint**: `/api/v1/matches/{match-id}`
+
+**Query parameter**
+
+| name | type | description | mandatory |
+|---|---|---|---|
+| match-id | number | match ID | 🗹 |
+
+### Body request
+
+**ContentType**: `text/plain`
+
+
+## Body response
+### Successful Operation
+
+**HTTP Status:** 200
+
+When the operation is successful, the server responds with a status code of 200
+
+### Unsuccessful Operation
+
+When an operation fails, the server responds with an appropriate HTTP status code to indicate the nature of the error. Additionally, the response body contains details regarding the error to assist in troubleshooting.

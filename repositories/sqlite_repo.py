@@ -239,6 +239,10 @@ class SQLiteRepository(Repository):
             (match_id,))
 
         result = cursor.fetchone()
+
+        if result is None:
+            return None
+
         return Match.get_instance(
             result[0],
             result[1],
