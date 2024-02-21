@@ -99,8 +99,29 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
                 "blue_score": int(result.final_result.split(":")[1])
                     if result.final_result is not None else None,
                 "red_players": [player.toJSON() for player in result.opponents[Teams.RED.value]["players"]],
-                "blue_players": [player.toJSON() for player in result.opponents[Teams.BLUE.value]["players"]]
+                "blue_players": [player.toJSON() for player in result.opponents[Teams.BLUE.value]["players"]],
+                "start_dt": result.created_at.strftime("%Y-%m-%d %H:%M:%S")
+                    if result.created_at is not None else None,
+                "end_dt": result.end_at.strftime("%Y-%m-%d %H:%M:%S")
+                    if result.end_at is not None else None,
+                "match_duration": result.match_duration.total_seconds()
+                    if result.match_duration is not None else None,
+                "args": result.args
             } for result in results]
         })
 
+
+    @match_bp.route('/<match_id>', methods=['DELETE'])
+    def delete_match(match_id):
+        """Delete match"""
+
+        match = repo.get_match(match_id)
+        if match is None:
+            return jsonify({ "result": "KO", "error": "Match not found" }), 400
+
+        result = game_service.delete_game(match_id)
+        if result is True:
+            return jsonify({ "result": "OK" }), 200
+
+        return jsonify({ "result": "KO", "error": "Unable to delete match" }), 400
     return match_bp

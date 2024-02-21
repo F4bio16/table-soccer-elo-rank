@@ -107,6 +107,14 @@ class SQLiteRepository(Repository):
         )
         self.connection.commit()
 
+    def update_game_state(self, game_id: int, state: GameState):
+        cursor = self.connection.cursor()
+        cursor.execute(
+            "UPDATE games SET state = ? WHERE id = ?", (state.value, game_id)
+        )
+
+        self.connection.commit()
+
     def get_players(self, query: str) -> list[Player]:
         """Restituisce la lista di giocatori (Player)"""
 
@@ -231,6 +239,10 @@ class SQLiteRepository(Repository):
             (match_id,))
 
         result = cursor.fetchone()
+
+        if result is None:
+            return None
+
         return Match.get_instance(
             result[0],
             result[1],
@@ -239,11 +251,13 @@ class SQLiteRepository(Repository):
         )
 
     def get_last_matches(self, limit: int):
-        """Recupera gli ultimi 10 match giocati"""
+        """Recupera gli ultimi match giocati"""
 
         cursor = self.connection.cursor()
         cursor.execute("""
-            SELECT games.id, games.state, games.final_result, games.expected_scores
+            SELECT
+                games.id, games.state, games.final_result,
+                games.expected_scores, games.created_at, games.end_at, games.args
             FROM games
             ORDER BY id DESC
             LIMIT ?
@@ -253,13 +267,16 @@ class SQLiteRepository(Repository):
 
         matches = []
         for result in cursor.fetchall():
-            matches.append(
-                Match.get_instance(
-                    result[0],
-                    result[1],
-                    result[2],
-                    result[3]
-                ))
+            curr_match = Match.get_instance(
+                result[0],
+                result[1],
+                result[2],
+                result[3]
+            )
+            curr_match.set_durations(result[4], result[5])
+            curr_match.set_args(result[6])
+
+            matches.append(curr_match)
         return matches
 
     def get_match_by_player(self, user_id: int):
@@ -295,3 +312,26 @@ class SQLiteRepository(Repository):
             matches.append(curr_match)
 
         return matches
+
+    def get_last_match_by_state(self, status: GameState):
+        cursor = self.connection.cursor()
+        cursor.execute("""
+            SELECT games.id, games.state, games.final_result, games.expected_scores
+            FROM games
+            WHERE state = ?
+            ORDER BY end_at DESC
+            LIMIT 1
+            """,
+            (status.value, )
+        )
+
+        result = cursor.fetchone()
+        if result is None:
+            return None
+
+        return Match.get_instance(
+            result[0],
+            result[1],
+            result[2],
+            result[3]
+        )

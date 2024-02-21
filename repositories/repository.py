@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from models.player import Player, Teams
 from models.match import Match
 from models.user_game import UserGame
+from models.game import GameState
 
 class Repository(ABC):
     """Repository Abstract Class"""
@@ -42,6 +43,10 @@ class Repository(ABC):
         """method for set expected_scores of a match"""
 
     @abstractmethod
+    def update_game_state(self, game_id: int, state: GameState):
+        """method for change status of the game"""
+
+    @abstractmethod
     def get_player(self, user_id: int, team: Teams) -> Player:
         """return player by user_id"""
 
@@ -64,3 +69,7 @@ class Repository(ABC):
     @abstractmethod
     def get_match_by_player(self, user_id: int):
         """return played match of a player"""
+
+    @abstractmethod
+    def get_last_match_by_state(self, status: GameState):
+        """get latest match by status"""
