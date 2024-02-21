@@ -117,11 +117,11 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
 
         match = repo.get_match(match_id)
         if match is None:
-            return 'invalid match id', 400
+            return jsonify({ "result": "KO", "error": "Match not found" }), 400
 
         result = game_service.delete_game(match_id)
         if result is True:
-            return 'OK', 200
+            return jsonify({ "result": "OK" }), 200
 
-        return "Unable to delete match", 400
+        return jsonify({ "result": "KO", "error": "Unable to delete match" }), 400
     return match_bp
