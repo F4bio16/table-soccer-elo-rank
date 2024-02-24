@@ -8,6 +8,7 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/css/autoComplete.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
       .white-box{
@@ -272,7 +273,7 @@
               <th class="center" colspan="2" width="150">Score</th>
               <th class="center">Squadra Rossa</th>
             </thead>
-            <tbody id="latest_matches">
+            <tbody id="all_matches">
               
             </tbody>
           </table>      
@@ -284,185 +285,75 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js" integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/autoComplete.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" integrity="sha512-GWzVrcGlo0TxTRvz9ttioyYJ+Wwk9Ck0G81D+eO63BaqHaJ3YZX9wuqjwgfcV/MrB2PhaVX9DkYVhbFpStnqpQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="static/js/functions.js"></script>
+    
     <script>
 
+      $.support.cors = true;
+      // $.cookie.json = true;
 
-      let red_team = [0,0]
-      let blue_team = [0,0]
-      let red_players_current = [0,0]
-      let blue_players_current = [0,0]
+      $.ajaxSetup({
+        cache: false,
+        crossDomain: true,
+        type: 'GET',
+        contentType: 'application/json',
+        dataType: 'json'
+      });
 
-      let all_players = []
-      
-      const endpoint = window.location.origin + "/api/v1"
+      if (typeof console === "undefined" || typeof console.log === "undefined") {
+        console = {};
+      }
 
-      $(document).ready(function(){
-
+      $( "body" ).on( "click", ".match_submit", function(e) {
+        e.preventDefault()
         $.ajax({
-          type: "GET",
-          url: endpoint + "/players/",
+          type: "POST",
+          url: endpoint + "/matches/start",
           contentType: "application/json",
-          success: function(data) {
-            $.each(data.players, function( index, value ) {
-              all_players.push(value['id'] + ' - '+value['name'])
+          data: JSON.stringify({
+            "red_team": red_team, 
+            "blue_team": blue_team
+          }),
+          success: function(data) {  
+            updateLatest();
+            $('#new_match').hide()
+            $('#match_odds').show()
+            blue_perc = Math.round(data.expected_scores.blue_wins * 100)
+            red_perc = Math.round(data.expected_scores.red_wins * 100)
+            $('.match_id').text(data.game_id)
+            $('#match_expectations .bg-primary').attr({
+              style: 'width: ' + blue_perc + '%',
+              'aria-valuenow': blue_perc,
+            });
+            $('#match_expectations .bg-primary').text(blue_perc + "%")
+            $('#match_expectations .bg-danger').attr({
+              style: 'width: ' + red_perc + '%',
+              'aria-valuenow': red_perc,
+            });
+            $('#match_expectations .bg-danger').text(red_perc + "%")
+            let blue_players_html = ''
+            let red_players_html = ''
+            $.each(blue_players_current, function(index, player){
+              blue_players_html += "<span class='badge bg-primary p"+index+1+"'>"+player+"</span><br>";
             })
+            $.each(red_players_current, function(index, player){
+              red_players_html += "<span class='badge bg-danger p"+index+1+"'>"+player+"</span><br>";
+            })
+            $('.blue_players_html').html(blue_players_html)
+            $('.red_players_html').html(red_players_html)
+          },
+          error: function(error){
+            let alert_content = '<div class="error_response_alert alert alert-danger alert-dismissible fade show" role="alert">\
+                                  <strong class="error_response">'+error.responseText+'</strong>\
+                                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>\
+                                </div>'
+            $('.alert_container').html(alert_content)
           }
-        })
-
-        const autoCompleteJSB1 = new autoComplete({
-            placeHolder: "Cerca giocatore 1...",
-            selector: "#autoCompleteB1",
-            data: {
-                src: all_players,
-                cache: true,
-            },
-            resultItem: {
-                highlight: true
-            },
-            events: {
-                input: {
-                    selection: (event) => {
-                        const selection = event.detail.selection.value;
-                        autoCompleteJSB1.input.value = selection;
-                        blue_team[0] = parseInt(selection.split(' - ')[0])
-                        blue_players_current[0] = selection.split(' - ')[1]
-                    }
-                }
-            }
         });
+      });
 
-        const autoCompleteJSB2 = new autoComplete({
-            placeHolder: "Cerca giocatore 2...",
-            selector: "#autoCompleteB2",
-            data: {
-                src: all_players,
-                cache: true,
-            },
-            resultItem: {
-                highlight: true
-            },
-            events: {
-                input: {
-                    selection: (event) => {
-                        const selection = event.detail.selection.value;
-                        autoCompleteJSB2.input.value = selection;
-                        blue_team[1] = parseInt(selection.split(' - ')[0])
-                        blue_players_current[1] = selection.split(' - ')[1]
-                    }
-                }
-            }
-        });
-
-        const autoCompleteJSR1 = new autoComplete({
-            placeHolder: "Cerca giocatore 1...",
-            selector: "#autoCompleteR1",
-            data: {
-                src: all_players,
-                cache: true,
-            },
-            resultItem: {
-                highlight: true
-            },
-            events: {
-                input: {
-                    selection: (event) => {
-                        const selection = event.detail.selection.value;
-                        autoCompleteJSR1.input.value = selection;
-                        red_team[0] = parseInt(selection.split(' - ')[0])
-                        red_players_current[0] = selection.split(' - ')[1]
-                    }
-                }
-            }
-        });
-
-        const autoCompleteJSR2 = new autoComplete({
-            placeHolder: "Cerca giocatore 2...",
-            selector: "#autoCompleteR2",
-            data: {
-                src: all_players,
-                cache: true,
-            },
-            resultItem: {
-                highlight: true
-            },
-            events: {
-                input: {
-                    selection: (event) => {
-                        const selection = event.detail.selection.value;
-                        autoCompleteJSR2.input.value = selection;
-                        red_team[1] = parseInt(selection.split(' - ')[0])
-                        red_players_current[1] = selection.split(' - ')[1]
-                    }
-                }
-            }
-        });
-
-
-        $.support.cors = true;
-        // $.cookie.json = true;
-
-        $.ajaxSetup({
-          cache: false,
-          crossDomain: true,
-          type: 'GET',
-          contentType: 'application/json',
-          dataType: 'json'
-        });
-
-        if (typeof console === "undefined" || typeof console.log === "undefined") {
-          console = {};
-        }
-
-        $( "body" ).on( "click", ".match_submit", function(e) {
-          e.preventDefault()
-          $.ajax({
-            type: "POST",
-            url: endpoint + "/matches/start",
-            contentType: "application/json",
-            data: JSON.stringify({
-              "red_team": red_team, 
-              "blue_team": blue_team
-            }),
-            success: function(data) {  
-              updateLatest();
-              $('#new_match').hide()
-              $('#match_odds').show()
-              blue_perc = Math.round(data.expected_scores.blue_wins * 100)
-              red_perc = Math.round(data.expected_scores.red_wins * 100)
-              $('.match_id').text(data.game_id)
-              $('#match_expectations .bg-primary').attr({
-                style: 'width: ' + blue_perc + '%',
-                'aria-valuenow': blue_perc,
-              });
-              $('#match_expectations .bg-primary').text(blue_perc + "%")
-              $('#match_expectations .bg-danger').attr({
-                style: 'width: ' + red_perc + '%',
-                'aria-valuenow': red_perc,
-              });
-              $('#match_expectations .bg-danger').text(red_perc + "%")
-              let blue_players_html = ''
-              let red_players_html = ''
-              $.each(blue_players_current, function(index, player){
-                blue_players_html += "<span class='badge bg-primary p"+index+1+"'>"+player+"</span><br>";
-              })
-              $.each(red_players_current, function(index, player){
-                red_players_html += "<span class='badge bg-danger p"+index+1+"'>"+player+"</span><br>";
-              })
-              $('.blue_players_html').html(blue_players_html)
-              $('.red_players_html').html(red_players_html)
-            },
-            error: function(error){
-              let alert_content = '<div class="error_response_alert alert alert-danger alert-dismissible fade show" role="alert">\
-                                    <strong class="error_response">'+error.responseText+'</strong>\
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>\
-                                  </div>'
-              $('.alert_container').html(alert_content)
-            }
-          });
-        });
-
-        $( "body" ).on( "click", "button.submit_result", function(e) {
+      $( "body" ).on( "click", "button.submit_result", function(e) {
           e.preventDefault()
           $parent_form =  $(this).closest('form')[0]
           let red_goals_val = $($parent_form).find('.red_goals').val()
@@ -484,10 +375,10 @@
                 }
                 $('.red_goals').val('')
                 $('.blue_goals').val('')
-                $('#my-autocomplete-container1 input').val('')
-                $('#my-autocomplete-container2 input').val('')
-                $('#my-autocomplete-container3 input').val('')
-                $('#my-autocomplete-container4 input').val('')
+                $('input#autoCompleteB1').val('')
+                $('input#autoCompleteB2').val('')
+                $('input#autoCompleteR1').val('')
+                $('input#autoCompleteR2').val('')
                 $('#new_match').show()
                 $('#match_odds').hide()
                 let modal_content = $('#rankings .modal-body')
@@ -515,10 +406,30 @@
           } 
         });
 
-        updateLatest();
+      
 
+      $( "body" ).on( "click", ".delete_match", function(e) {
+        e.preventDefault()
+        let tr = $(this).parents('tr')
+        let match_id = $(this).parents('tr').attr('data-match-id')
+
+        $.ajax({
+          type: "DELETE",
+          contentType: "application/json",
+          url: endpoint + "/matches/"+ match_id,
+          data: JSON.stringify({
+          }),
+          success: function(data) {
+            location.reload()
+          },
+          error: function(data){
+            $(tr).css({backgroundColor: 'red'})
+          }
+        })
+      })
+      
         let resultModal = false
-        $( "body" ).on( "click", "button.add_match_result", function(e) {
+      $( "body" ).on( "click", "button.add_match_result", function(e) {
           e.preventDefault()
           let tr = $(this).parents('tr')
           if($(tr).length > 0){
@@ -541,48 +452,10 @@
           resultModal.show();
         })
 
+      $( "body" ).on( "click", ".rematch_button", function(e) {
+          e.preventDefault()
+          rematch($(this))
       })
-
-      function sortByRank(a, b) {
-        return a.score - b.score;
-      }
-
-      function updateLatest(){ 
-        $.ajax({
-          type: "GET",
-          contentType: "application/json",
-          url: endpoint + "/matches/?limit=10",
-          success: function(data) {
-            $latest_table = $('#latest_matches')
-            $latest_table.html('')
-            $.each(data['matches'], function( index, value ) {
-              
-              let blue_score_colored = "<span class='badge bg-success'>"+value['blue_score']+"</span>"
-              if(value['blue_score'] < value['red_score']){
-                blue_score_colored = "<span class='badge bg-secondary'>"+value['blue_score']+"</span>"
-              }
-
-              let red_score_colored = "<span class='badge bg-success'>"+value['red_score']+"</span>"
-              if(value['blue_score'] > value['red_score']){
-                red_score_colored = "<span class='badge bg-secondary'>"+value['red_score']+"</span>"
-              }
-
-              let row = "<tr class='match_row' data-match-id="+value['id']+">\
-                <td class='center'>"+value['id']+"</td>\
-                <td class='center'><span class='badge bg-primary'>"+value['blue_players'][0]['name']+"</span><span class='badge bg-primary'>"+value['blue_players'][1]['name']+"</span></td>"
-                if(value['state'] == "__end__"){
-                  row = row + "<td style='text-align:right'>"+blue_score_colored+"</td><td style='text-align:left'>"+red_score_colored+"</td>"
-                }else{
-                  row = row + "<td colspan='2' class='center'><button class='btn btn-warning btn-sm add_match_result'>Inserisci risultato</button></td>"
-                }
-                row = row + "<td class='center'><span class='badge bg-danger'>"+value['red_players'][0]['name']+"</span><span class='badge bg-danger'>"+value['red_players'][1]['name']+"</span></td></tr>"
-              
-              $latest_table.append(row)
-            });
-          }
-        });
-      }
-
     </script>
   </body>
 </html>
