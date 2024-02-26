@@ -111,9 +111,12 @@ def matches(webservice_name, repo: SQLiteRepository, game_service: GameService):
         })
 
 
-    @match_bp.route('/<match_id>', methods=['DELETE'])
-    def delete_match(match_id):
+    @match_bp.route('/<int:match_id>', methods=['DELETE'])
+    def delete_match(match_id: int):
         """Delete match"""
+
+        if match_id is None or isinstance(match_id, int) is False:
+            return jsonify({ "result": "KO", "error": "invalid Match ID"}), 400
 
         match = repo.get_match(match_id)
         if match is None:
