@@ -128,6 +128,12 @@ class Match:
 
         return self.opponents[team]["match_points"]
 
+    def get_player_ratio_on_team(self, player: Player):
+        """return the player ratio on the team"""
+
+        player_ratio = player.rank_score / self.opponents[player.team]["team_points"]
+        return player_ratio
+
     def get_winner_opponent(self):
         """retrieve the winner opponent of the match"""
         if self.opponents["winner_team"] is None:

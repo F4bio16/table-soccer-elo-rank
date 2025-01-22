@@ -29,7 +29,23 @@ class Player(User):
 
         self.last_results = (sqlite_max_integer -1) & result
 
-    def add_rank_score(self, score):
+    def calc_match_points(self, is_winner: bool, team_ratio: float, match_score: float):
+        """calculate point earned by user on the match"""
+        if is_winner is True:
+            # il vincitore più forte prende meno punti
+            # quindi si inverte il ratio per la distribuzione
+            # dei punteggi guadagnati nel match
+            team_ratio = 1 - team_ratio
+        elif is_winner is False and match_score > 0:
+            # nel caso in cui i perdenti guadagnano punti
+            # il ratio va invertito comunque per dare più
+            # punti al giocatore più scarso
+            team_ratio = 1 - team_ratio
+
+        earned_match_point = team_ratio * match_score
+        return round(earned_match_point, 2)
+
+    def add_rank_score(self, score: float):
         """sum score to the player rank_score"""
         self.rank_score += score
 

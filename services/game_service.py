@@ -137,14 +137,20 @@ class GameService:
 
         for el in players:
             player = el[0]
-            player.add_result(winner == player.team)
+            is_winner = winner == player.team
 
             match_point = match.opponents[player.team]["match_points"]
+            player.add_result(is_winner)
+
+            player_match_point = player.calc_match_points(
+                is_winner,
+                match.get_player_ratio_on_team(player),
+                match_point
+            )
+            player.add_rank_score(player_match_point)
 
             user_game = UserGame.get_instance(match, player)
-            user_game.set_earned_score(match_point)
-
-            player.add_rank_score(match_point)
+            user_game.set_earned_score(player_match_point)
 
             self.repo.update_user_rank(player.id, player.rank_score, player.last_results)
             self.repo.update_user_game(user_game)
